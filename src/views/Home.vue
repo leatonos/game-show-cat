@@ -1,9 +1,22 @@
 <script setup lang="ts">
+
+import { onMounted, ref } from 'vue';
+import {socket} from '../plugins/plugins';
+
+
+const message = ref('');
+
+onMounted(() => {
+  socket.on('my-event', (data: any) => {
+    message.value = data.text;
+  });
+});
+
 </script>
 
 <template>
-  <div>
-  <h1>Home</h1>
+  <div v-motion-fade>
+
   </div>
 </template>
 
