@@ -5,6 +5,8 @@ import {socket,getRandomString} from '../plugins/plugins';
 import NewPlayer from './modals/NewPlayer.vue';
 import type { Player } from '../types';
 import PlayerAdmin from './screens/PlayerAdmin.vue';
+import { questionCategories } from '../questions';
+import QuestionSelection from './screens/QuestionSelection.vue';
 
 
 const createRoom = () => {
@@ -22,34 +24,36 @@ interface GridButton {
 const isGameReady = ref<boolean>(false)
 const roomId = ref<string>('Game not ready')
 const isModalOn = ref<boolean>(false)
-const screenState = ref<string>('controls')
+const activeScreen = ref<string>('controls')
 const players = ref<Player[]>([])
+const allQuestionCategories = ref(questionCategories)
 
 
 //Functions
 const closeModal = () =>{
   console.log("Testing close btn")
   isModalOn.value = false
-  screenState.value = 'controls'
+  activeScreen.value = 'controls'
 }
 
 //Buttons list
 const buttons = ref<GridButton[]>([
   { label: 'Add Player', action: 'add_player' },
   { label: 'Players', action: 'show_players' },
-  { label: 'Questions', action: 'show_questions' },
-  { label: 'Help', action: 'get_help' }
+  { label: 'Show Questions', action: 'show_questions' },
+  { label: 'Choose Questions', action: 'open_question_selector' },
+  { label: "Syncronize Room", action: "synchronize_room"},
 ]);
 
 //Button Handler
 const handleButtonClick = (action: string) => {
   // Define what each action does in a clean lookup table
   const actions: Record<string, () => void> = {
-    add_player: () => {isModalOn.value = true;screenState.value = 'add_player';},
-    show_players: () => screenState.value = 'players',
-    show_questions: () => socket.emit('get_questions'),
-    get_help: () => window.open('https://wiki.yourgame.com'),
-    open_shop: () => alert('Welcome to the Shop!')
+    add_player: () => {isModalOn.value = true;activeScreen.value = 'add_player';},
+    show_players: () => showPlayers(),
+    show_questions: () => showQuestions(),
+    open_question_selector: () => openQuestionSelector(),
+    synchronize_room: () => synchronizeRoom()
   };
 
   // Execute the function if it exists, otherwise log a warning
@@ -59,6 +63,24 @@ const handleButtonClick = (action: string) => {
     console.warn(`No logic defined for action: ${action}`);
   }
 };
+
+const openQuestionSelector = () => {
+  socket.emit('change_screen', { room_id: roomId.value, screen: 'question_selector' })
+}
+
+const showQuestions = () => {
+  //activeScreen.value = 'question_board'
+  socket.emit('change_screen', { room_id: roomId.value, screen: 'question_board' })
+}
+
+const showPlayers = () => {
+  socket.emit('change_screen', { room_id: roomId.value, screen: 'players' })
+} 
+
+const synchronizeRoom = () => {
+  console.log("Synchronizing room data...");
+  socket.emit('synchronize_room', { 'players': players.value, 'room_id': roomId.value, 'all_categories': allQuestionCategories.value });
+}
 
 
 //Socket Listeners
@@ -86,8 +108,34 @@ onMounted(() => {
   })
 
   socket.on('player_deleted', (deletedPlayerId) => {
-    players.value = players.value.filter(p => p.id !== deletedPlayerId.player_id)
+    console.log("Player deleted:", deletedPlayerId);
+    players.value = players.value.filter(p => p.id !== deletedPlayerId)
   })
+
+  socket.on('player_chose_category', ({ player_id, category }: { player_id: string, category: string }) => {
+    const player = players.value.find(p => p.id === player_id);
+    const categoryItem = allQuestionCategories.value.find(cat => cat.name === category);
+
+    // If either is missing, stop execution
+    if (!player || !categoryItem) {
+      console.warn("Player or Category not found");
+      return;
+    }
+
+    // Now TypeScript knows 'categoryItem' is defined
+    categoryItem.isChosen = true;
+
+    console.log(allQuestionCategories.value);
+    player.chosenCategories.push(categoryItem)
+    console.log(player)
+    
+  });
+
+  socket.on('screen_changed', (data: { screen: string }) => {
+    activeScreen.value = data.screen
+  })
+
+
 
 })
 
@@ -95,16 +143,16 @@ onMounted(() => {
 
 <template>
   <div v-if="!isGameReady" v-motion-fade>
-    <button @click="createRoom">Start game</button>
+    <button @click="createRoom">Open game room</button>
   </div>
 
   <div class="game-control-container" v-if="isGameReady">
     <h1>Game id: {{ roomId }}</h1>
-    <p>{{ screenState }}</p>
-    <div v-if="screenState != 'controls'">
-      <button @click="screenState = 'controls'">Back</button>
+    <p>Game id: {{ activeScreen }}</p>
+    <div v-if="activeScreen != 'controls'">
+      <button @click="activeScreen = 'controls'">Back</button>
     </div>
-    <div v-if="screenState == 'controls'" class="control-grid">
+    <div v-if="activeScreen == 'controls'" class="control-grid">
       <button 
         v-for="btn in buttons" 
         :key="btn.action" 
@@ -114,7 +162,13 @@ onMounted(() => {
         {{ btn.label }}
       </button>
     </div>
-    <div v-if="screenState == 'players'">
+    <div v-if="activeScreen == 'players'">
+      <PlayerAdmin :room_id="roomId" :players="players" />
+    </div>
+     <div v-if="activeScreen == 'question_selector'">
+      <QuestionSelection :allQuestionCategories="allQuestionCategories" :room_id="roomId" :players="players" />
+    </div>
+    <div v-if="activeScreen == 'question_board'">
       <PlayerAdmin :room_id="roomId" :players="players" />
     </div>
   </div>
@@ -123,7 +177,7 @@ onMounted(() => {
       <div class="modal-container">
         <NewPlayer
           :roomId="roomId"
-          v-if="screenState == 'add_player'"
+          v-if="activeScreen == 'add_player'"
           @closeThisModal="closeModal"
         />
       </div>

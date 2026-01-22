@@ -12,7 +12,7 @@ export type Question = {
 export type QuestionCategory = {
   name: string;
   questions: Question[];
-  isChosen?: boolean;
+  isChosen: boolean;
 }
 
 export const questionCategories: QuestionCategory[] = [
@@ -70,6 +70,7 @@ export const questionCategories: QuestionCategory[] = [
         state: 'unasked',
       },
     ],
+    isChosen: false,
   },
   {
     name: 'Movies & TV',
@@ -145,5 +146,6 @@ export const questionCategories: QuestionCategory[] = [
         state: 'unasked',
       },
     ],
+    isChosen: false,
   },
 ];

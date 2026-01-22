@@ -2,28 +2,38 @@
 
 import { socket } from '../../plugins/plugins';
 import type { Player } from '../../types';
-import { questionCategories } from '../../questions';
-import { ref } from 'vue';
+import { type QuestionCategory } from '../../questions';
+import { computed, ref } from 'vue';
 
 const props = defineProps<{
     players:Player[],
-    room_id:string
+    room_id:string,
+    allQuestionCategories:QuestionCategory[]
 }>();
-
-
-
 
 const playerTurn = ref<number>(0);
 
 const nextTurn = () => {
-  playerTurn.value = (playerTurn.value + 1) % props.players.length
+    if (props.players.length === 0) return;
+    playerTurn.value = (playerTurn.value + 1) % props.players.length;
 }
 
-const chooseCategory = (playerIndex:number, category:string, room_id:string) => {
+const chooseCategory = (playerIndex: number, category: string, room_id: string) => {
     const chosenPlayer = props.players[playerIndex];
-    socket.emit('choose_category', { 'player_id': chosenPlayer!.id, 'room_id': room_id, 'category': category });
-    nextTurn();
+    
+    if (chosenPlayer) {
+        socket.emit('choose_category', { 
+            'player_id': chosenPlayer.id, 
+            'room_id': room_id, 
+            'category': category 
+        });
+        nextTurn();
+    }
 }
+
+const availableCategories = computed(() => {
+    return props.allQuestionCategories.filter(cat => !cat.isChosen);
+});
 
 </script>
 
@@ -35,9 +45,14 @@ const chooseCategory = (playerIndex:number, category:string, room_id:string) => 
             </div>
         </div>
         <div class="category_list">
-            <div class="category_box" @click="chooseCategory(playerTurn, category.name, props.room_id)" v-for="category in questionCategories" :key="category.name">
-                <p>{{ category.name }}</p>
-            </div>
+            <div 
+                class="category_box" 
+                @click="chooseCategory(playerTurn, category.name, props.room_id)" 
+                v-for="category in availableCategories" 
+                :key="category.name"
+            >
+    <p>{{ category.name }}</p>
+  </div>
         </div>
     </div>
 </template>
