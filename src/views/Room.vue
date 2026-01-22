@@ -1,14 +1,17 @@
 <script setup lang="ts">
+
 import { ref, onMounted, computed } from 'vue'
 import { useRoute } from 'vue-router'
 import { socket } from '../plugins/plugins'
 import type { Player } from '../types'
 import PlayerView from './components/PlayerView.vue'
+import QuestionSelection from './screens/QuestionSelection.vue'
 
 const route = useRoute()
 const roomId = route.params.roomId as string
 const messages = ref<string[]>([])
 const players = ref<Player[]>([])
+const activeScreen = ref<string>('question_setup')
 
 // 1. Reactive sorted list
 const sortedPlayers = computed(() => {
@@ -27,6 +30,10 @@ onMounted(() => {
     players.value.push(newPlayer)
   })
 
+  socket.on('player_deleted', (deletedPlayerId) => {
+    players.value = players.value.filter(p => p.id !== deletedPlayerId.player_id)
+  })
+
   // 2. Listen for score updates to trigger the re-sort
   socket.on('score_updated', ({ player_id, score }: { player_id: string, score: number }) => {
     console.log('Score update received for', player_id, 'new score:', score)
@@ -35,24 +42,32 @@ onMounted(() => {
       player.score = score
     }
   })
+
+  socket.on('category_chosen', ({player_id, category}: {player_id: string, category: string}) => {
+    console.log(`Player ${player_id} chose category ${category}`);
+  })
+
 })
 </script>
 
 <template>
   <main class="room">
-    <h1>Room: {{ roomId }}</h1>
-    
-    <TransitionGroup name="list" tag="div" class="players-container">
+    <!-- <h1>Room: {{ roomId }}</h1> -->
+    <TransitionGroup v-if="activeScreen == 'players'" name="list" tag="div" class="players-container">
       <PlayerView 
         v-for="player in sortedPlayers" 
         :key="player.id" 
         :player="player" 
       />
     </TransitionGroup>
+    <div v-if="activeScreen == 'question_setup'">
+      <QuestionSelection :room_id="roomId" :players="players" />
+    </div>
   </main>
 </template>
 
 <style scoped>
+
 .room {
   width: 100%;
   padding: 20px;
@@ -60,6 +75,7 @@ onMounted(() => {
 
 .players-container {
   display: flex;
+  flex-wrap: wrap;
   justify-content: center;
   gap: 10px;
   margin-bottom: 20px;
@@ -76,7 +92,7 @@ onMounted(() => {
 .list-enter-from,
 .list-leave-to {
   opacity: 0;
-  transform: translateY(30px);
+  transform: translateY(80px);
 }
 
 /* ensure leaving items are taken out of layout flow so that moving

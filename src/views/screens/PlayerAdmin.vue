@@ -4,6 +4,7 @@ import PlayerView from '../components/PlayerView.vue';
 
 const props = defineProps<{
   players: Player[]
+  room_id: string
 }>();
 
 </script>
@@ -15,6 +16,7 @@ const props = defineProps<{
         :key="player.id" 
         :player="player" 
         :isHostView="true"
+        :room_id="props.room_id"
          />
     </div>
 

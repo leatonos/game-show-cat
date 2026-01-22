@@ -22,6 +22,7 @@ const createPlayer = (newPlayerName:string) => {
 const closeModal = () => {
   emit('closeThisModal')
 }
+
 </script>
 
 <template>

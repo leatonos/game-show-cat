@@ -84,7 +84,11 @@ onMounted(() => {
     }
     socket.emit('update_players', { 'players': players.value, 'room_id': roomId.value});
   })
-  
+
+  socket.on('player_deleted', (deletedPlayerId) => {
+    players.value = players.value.filter(p => p.id !== deletedPlayerId.player_id)
+  })
+
 })
 
 </script>
@@ -97,6 +101,9 @@ onMounted(() => {
   <div class="game-control-container" v-if="isGameReady">
     <h1>Game id: {{ roomId }}</h1>
     <p>{{ screenState }}</p>
+    <div v-if="screenState != 'controls'">
+      <button @click="screenState = 'controls'">Back</button>
+    </div>
     <div v-if="screenState == 'controls'" class="control-grid">
       <button 
         v-for="btn in buttons" 
@@ -108,7 +115,7 @@ onMounted(() => {
       </button>
     </div>
     <div v-if="screenState == 'players'">
-      <PlayerAdmin :players="players" />
+      <PlayerAdmin :room_id="roomId" :players="players" />
     </div>
   </div>
   <Teleport to="body">

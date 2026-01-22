@@ -9,10 +9,15 @@ const props = defineProps<{
     score: number;
   }
   isHostView?: boolean
+  room_id?: string
 }>();
 
 const changeScore = (amount: number) => {
-  socket.emit('update_score', { 'player_id': props.player.id, 'score': props.player.score + amount});
+  socket.emit('update_score', { 'player_id': props.player.id, 'score': props.player.score + amount, 'room_id': props.room_id });
+};
+
+const deletePlayer = () => {
+  socket.emit('delete_player', { 'player_id': props.player.id, 'room_id': props.room_id });
 };
 
 </script>
@@ -34,6 +39,7 @@ const changeScore = (amount: number) => {
           <button @click="changeScore(-100)" class="score-button">-100</button>
           <button @click="changeScore(-250)" class="score-button">-250</button>
         </div>
+        <button @click="deletePlayer" class="delete-button">Delete</button>
       </div>
     </div>
 </template>
@@ -53,12 +59,22 @@ const changeScore = (amount: number) => {
   margin: 0;
   border-radius: 5px;
   background-color: #242424;
-  width: 25%;
+  width: 20%;
+  box-sizing: border-box;
 }
 
 .player_name{
   font-size: 2em;
   margin-bottom: 0px;
+}
+
+.delete-button{
+  width: 30%;
+  text-align: center;
+  padding: 10px 0px;
+  box-sizing: border-box;
+  background-color: #ff4d4d;
+  color: white;
 }
 
 .score-button{
