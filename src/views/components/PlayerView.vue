@@ -59,7 +59,7 @@ const deletePlayer = () => {
   margin: 0;
   border-radius: 5px;
   background-color: #242424;
-  width: 20%;
+  width: 100%;
   box-sizing: border-box;
 }
 

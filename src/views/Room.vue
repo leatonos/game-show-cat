@@ -86,6 +86,9 @@ onMounted(() => {
     <div v-if="activeScreen == 'question_selector'">
       <QuestionSelection :allQuestionCategories="allQuestionCategories" :room_id="roomId" :players="players" />
     </div>
+    <div v-if="activeScreen == 'question_board'">
+      <slot name="question-board" />
+    </div>
   </main>
 </template>
 

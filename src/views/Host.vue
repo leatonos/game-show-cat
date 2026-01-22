@@ -7,6 +7,7 @@ import type { Player } from '../types';
 import PlayerAdmin from './screens/PlayerAdmin.vue';
 import { questionCategories } from '../questions';
 import QuestionSelection from './screens/QuestionSelection.vue';
+import QuestionBoard from './screens/QuestionBoard.vue';
 
 
 const createRoom = () => {
@@ -147,8 +148,6 @@ onMounted(() => {
   </div>
 
   <div class="game-control-container" v-if="isGameReady">
-    <h1>Game id: {{ roomId }}</h1>
-    <p>Game id: {{ activeScreen }}</p>
     <div v-if="activeScreen != 'controls'">
       <button @click="activeScreen = 'controls'">Back</button>
     </div>
@@ -169,7 +168,7 @@ onMounted(() => {
       <QuestionSelection :allQuestionCategories="allQuestionCategories" :room_id="roomId" :players="players" />
     </div>
     <div v-if="activeScreen == 'question_board'">
-      <PlayerAdmin :room_id="roomId" :players="players" />
+      <QuestionBoard :room_id="roomId" :players="players" :isHostView="true" />
     </div>
   </div>
   <Teleport to="body">
@@ -212,7 +211,8 @@ onMounted(() => {
 }
 .game-control-container {
   text-align: center;
-  margin: 20px;
+  width: 100%;
+  height: 100vh;
 }
 .control-grid {
   display: grid;
