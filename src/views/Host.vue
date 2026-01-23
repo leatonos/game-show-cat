@@ -1,7 +1,8 @@
 <script setup lang="ts">
 
 import { onMounted, ref } from 'vue';
-import {socket,getRandomString} from '../plugins/plugins';
+import {socket} from '../plugins/plugins';
+//import { getRandomString } from '../plugins/plugins';
 import NewPlayer from './modals/NewPlayer.vue';
 import type { Player } from '../types';
 import PlayerAdmin from './screens/PlayerAdmin.vue';
@@ -11,7 +12,7 @@ import QuestionBoard from './screens/QuestionBoard.vue';
 
 
 const createRoom = () => {
-  const roomId = getRandomString(5)
+  //const roomId = getRandomString(5)
   const roomIdtest = 'test'
   socket.emit('create_room', roomIdtest );
 };

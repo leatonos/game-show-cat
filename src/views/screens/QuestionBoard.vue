@@ -4,6 +4,7 @@ import type { Player } from '../../types';
 import { socket } from '../../plugins/plugins';
 import { ref } from 'vue';
 import PlayerView from '../components/PlayerView.vue';
+import type { Question } from '../../questions';
 
 const props = defineProps<{
   players:Player[],
@@ -12,6 +13,11 @@ const props = defineProps<{
 }>();
 
 const playerTurn = ref<number>(0);
+
+const askQuestion = (question:Question) => {
+  console.log(`Asking question: ${question.question}`);
+  socket.emit('ask_question', { 'question': question, 'room_id': props.room_id });
+};
 
 </script>
 
@@ -38,7 +44,7 @@ const playerTurn = ref<number>(0);
           </div>
           <div class="question_category_box" v-for="category in props.players[playerTurn]?.chosenCategories" :key="category.name">
             <h2>{{ category.name }}</h2>
-            <div class="question_box" v-for="question in category.questions" :key="question.value">
+            <div class="question_box" @click="askQuestion(question)" v-for="question in category.questions" :key="question.value">
               <p>{{ question.value }}</p>
             </div>
           </div>

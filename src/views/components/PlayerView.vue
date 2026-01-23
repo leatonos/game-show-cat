@@ -22,8 +22,6 @@ const deletePlayer = () => {
 
 </script>
 
-
-
 <template>
     <div v-motion-fade class="player-item">
       <h3 class="player_name">{{ player.name }}</h3>
