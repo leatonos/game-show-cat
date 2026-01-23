@@ -39,12 +39,19 @@ const deletePlayer = () => {
           <button @click="changeScore(-100)" class="score-button">-100</button>
           <button @click="changeScore(-250)" class="score-button">-250</button>
         </div>
-        <button @click="deletePlayer" class="delete-button">Delete</button>
+        <button @click="deletePlayer" class="delete-button">
+          <img src="../../assets/trash.svg" alt="Delete" class="icon" />
+        </button>
       </div>
     </div>
 </template>
 
 <style scoped>
+
+.icon{
+  width: 32px;
+  height: 32px;
+}
 
 .button-line{
   display: flex;
@@ -54,8 +61,9 @@ const deletePlayer = () => {
 }
 
 .player-item {
+  position: relative;
   border: 1px solid #ccc;
-  padding: 10px;
+  padding: 5px;
   margin: 0;
   border-radius: 5px;
   background-color: #242424;
@@ -68,13 +76,15 @@ const deletePlayer = () => {
   margin-bottom: 0px;
 }
 
-.delete-button{
-  width: 30%;
-  text-align: center;
-  padding: 10px 0px;
+.delete-button {
+  position: absolute; /* add this */
+  top: 8px;
+  right: 8px;
+  text-align: center; 
+  padding: 0px;
   box-sizing: border-box;
-  background-color: #ff4d4d;
   color: white;
+  background-color: rgba(255, 0, 0, 0);
 }
 
 .score-button{

@@ -136,8 +136,6 @@ onMounted(() => {
     activeScreen.value = data.screen
   })
 
-
-
 })
 
 </script>

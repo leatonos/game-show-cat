@@ -11,13 +11,14 @@ const props = defineProps<{
 
 <template>
     <div class="player-admin-screen">
-       <PlayerView 
-        v-for="player in props.players" 
-        :key="player.id" 
-        :player="player" 
-        :isHostView="true"
-        :room_id="props.room_id"
-         />
+      <div  v-for="player in props.players" :key="player.id" class="player-admin-item">
+        <PlayerView 
+         :key="player.id" 
+         :player="player" 
+         :isHostView="true"
+         :room_id="props.room_id"
+          />
+      </div>
     </div>
 
 </template>
@@ -25,9 +26,15 @@ const props = defineProps<{
 <style scoped>
 .player-admin-screen {
   display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1em;
   padding: 20px;
   background-color: #222;
   border-radius: 8px;
   color: #fff;
+}
+.player-admin-item{
+  width: 23%;
 }
 </style>
