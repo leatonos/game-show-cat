@@ -19,32 +19,29 @@ const askQuestion = (question:Question) => {
   socket.emit('ask_question', { 'question': question, 'room_id': props.room_id });
 };
 
+const setTurn = (index: number) => {
+    playerTurn.value = index;
+};
+
 </script>
-
-
 
 <template>
    <main class="screen_container">
 
      <aside class="player_list">
         <PlayerView 
-          v-for="player in props.players" 
+          v-for="(player, index) in props.players" 
           :key="player.id" 
           :player="player" 
           :isHostView="props.isHostView"
           :room_id="props.room_id"
+          @click="setTurn(index)"
           />
      </aside>
         <div class="question_board" v-if="props.players[playerTurn]">
           <div class="question_category_box" v-for="category in props.players[playerTurn]?.chosenCategories" :key="category.name">
             <h2>{{ category.name }}</h2>
             <div class="question_box" v-for="question in category.questions" :key="question.value">
-              <p>{{ question.value }}</p>
-            </div>
-          </div>
-          <div class="question_category_box" v-for="category in props.players[playerTurn]?.chosenCategories" :key="category.name">
-            <h2>{{ category.name }}</h2>
-            <div class="question_box" @click="askQuestion(question)" v-for="question in category.questions" :key="question.value">
               <p>{{ question.value }}</p>
             </div>
           </div>
