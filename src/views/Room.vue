@@ -6,13 +6,18 @@ import { socket } from '../plugins/plugins'
 import type { Player } from '../types'
 import PlayerView from './components/PlayerView.vue'
 import QuestionSelection from './screens/QuestionSelection.vue'
-import { questionCategories, type QuestionCategory } from '../questions'
+import { allQuestionCategories, type QuestionCategory, type QuestionState } from '../plugins/questions'
+import QuestionScreen from './screens/Question.vue'
+import type { Question } from '../plugins/questions'
+import QuestionBoard from './screens/QuestionBoard.vue'
 
 const route = useRoute()
 const roomId = route.params.roomId as string
 const players = ref<Player[]>([])
 const activeScreen = ref<string>('question_setup')
-const allQuestionCategories = ref(questionCategories)
+const availableCategories = ref(allQuestionCategories)
+const chosen_alternative = ref<string | undefined>(undefined)
+const activeQuestion = ref<Question | undefined>(undefined)
 
 // 1. Reactive sorted list
 const sortedPlayers = computed(() => {
@@ -20,6 +25,22 @@ const sortedPlayers = computed(() => {
   return [...players.value].sort((a, b) => b.score - a.score)
 })
 
+const answerQuestion = (questionId: string, state: QuestionState) => {
+
+
+  for (const category of availableCategories.value) {
+    const question = category.questions.find(
+      q => q.id === questionId
+    );
+
+    if (question) {
+      question.state = state;
+      return; // stop once found
+    }
+  }
+}
+
+// Socket event listeners
 onMounted(() => {
   socket.emit('join_room', roomId)
 
@@ -42,12 +63,12 @@ onMounted(() => {
   socket.on('data_sync', ({ players: syncedPlayers, all_categories }: { players: Player[], all_categories: QuestionCategory[] }) => {
     console.log("Room synchronized from server.")
     players.value = syncedPlayers
-    allQuestionCategories.value = all_categories
+    availableCategories.value = all_categories
   })
 
   socket.on('player_chose_category', ({ player_id, category }: { player_id: string, category: string }) => {
     const player = players.value.find(p => p.id === player_id);
-    const categoryItem = allQuestionCategories.value.find(cat => cat.name === category);
+    const categoryItem = availableCategories.value.find(cat => cat.name === category);
 
     // If either is missing, stop execution
     if (!player || !categoryItem) {
@@ -58,14 +79,27 @@ onMounted(() => {
     // Now TypeScript knows 'categoryItem' is defined
     categoryItem.isChosen = true;
 
-    console.log(allQuestionCategories.value);
-    player.chosenCategories.push(categoryItem)
+    console.log(availableCategories.value);
+    player.chosenCategories.push(categoryItem.name)
     
   });
 
   socket.on('screen_changed', (data: { screen: string }) => {
     console.log("Screen change received:", data.screen);
     activeScreen.value = data.screen
+  })
+
+  socket.on('question_asked', (data: { question: Question, chosen_alternative?: string }) => {
+    console.log("Question asked:", data.question);
+    activeQuestion.value = data.question
+    chosen_alternative.value = undefined
+    activeScreen.value = 'question'
+  })
+
+  socket.on('question_answered', (data: { question_id: string, question_state: QuestionState, chosen_alternative: string }) => {
+    console.log("Question answered:", data);
+    answerQuestion(data.question_id, data.question_state)
+    chosen_alternative.value = data.chosen_alternative
   })
 
 })
@@ -75,7 +109,6 @@ onMounted(() => {
 <template>
   <main class="room">
     <!-- <h1>Room: {{ roomId }}</h1> -->
-     <p>{{ activeScreen }}</p>
     <TransitionGroup v-if="activeScreen == 'players'" name="list" tag="div" class="players-container">
       <PlayerView 
         v-for="player in sortedPlayers" 
@@ -84,10 +117,13 @@ onMounted(() => {
       />
     </TransitionGroup>
     <div v-if="activeScreen == 'question_selector'">
-      <QuestionSelection :allQuestionCategories="allQuestionCategories" :room_id="roomId" :players="players" />
+      <QuestionSelection :allQuestionCategories="availableCategories" :room_id="roomId" :players="players" />
     </div>
     <div v-if="activeScreen == 'question_board'">
-      <slot name="question-board" />
+      <QuestionBoard :allAvailableCategories="availableCategories" :room_id="roomId" :players="players" :isHostView="false" />
+    </div>
+    <div v-if="activeScreen == 'question'">
+      <QuestionScreen :room_id="roomId" :isHostView="false" :chosenAlternative="chosen_alternative" :question="activeQuestion" />
     </div>
   </main>
 </template>
@@ -96,7 +132,7 @@ onMounted(() => {
 
 .room {
   width: 100%;
-  padding: 20px;
+  padding: 0px;
 }
 
 .players-container {

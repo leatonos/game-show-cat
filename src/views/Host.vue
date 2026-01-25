@@ -5,10 +5,13 @@ import {socket} from '../plugins/plugins';
 //import { getRandomString } from '../plugins/plugins';
 import NewPlayer from './modals/NewPlayer.vue';
 import type { Player } from '../types';
+import { allQuestionCategories, type Question, type QuestionCategory, type QuestionState } from '../plugins/questions';
+
+//Screen Components
 import PlayerAdmin from './screens/PlayerAdmin.vue';
-import { questionCategories } from '../questions';
 import QuestionSelection from './screens/QuestionSelection.vue';
 import QuestionBoard from './screens/QuestionBoard.vue';
+import QuestionScreen from './screens/Question.vue';
 
 
 const createRoom = () => {
@@ -28,7 +31,9 @@ const roomId = ref<string>('Game not ready')
 const isModalOn = ref<boolean>(false)
 const activeScreen = ref<string>('controls')
 const players = ref<Player[]>([])
-const allQuestionCategories = ref(questionCategories)
+const availableCategories = ref<QuestionCategory[]>(allQuestionCategories)
+const activeQuestion = ref<Question | undefined>(undefined)
+const chosenAlternative = ref<string | undefined>(undefined)
 
 
 //Functions
@@ -37,6 +42,21 @@ const closeModal = () =>{
   isModalOn.value = false
   activeScreen.value = 'controls'
 }
+
+const answerQuestion = (questionId: string, state: QuestionState) => {
+
+  console.log("Answering question:", questionId, "with state:", state);
+
+  for (const category of availableCategories.value) {
+    const question = category.questions.find(q => q.id === questionId);
+
+    if (question) {
+      question.state = state;
+      return; // stop once found
+    }
+  }
+}
+
 
 //Buttons list
 const buttons = ref<GridButton[]>([
@@ -81,9 +101,8 @@ const showPlayers = () => {
 
 const synchronizeRoom = () => {
   console.log("Synchronizing room data...");
-  socket.emit('synchronize_room', { 'players': players.value, 'room_id': roomId.value, 'all_categories': allQuestionCategories.value });
+  socket.emit('synchronize_room', { 'players': players.value, 'room_id': roomId.value, 'all_categories': availableCategories.value });
 }
-
 
 //Socket Listeners
 onMounted(() => {
@@ -116,7 +135,9 @@ onMounted(() => {
 
   socket.on('player_chose_category', ({ player_id, category }: { player_id: string, category: string }) => {
     const player = players.value.find(p => p.id === player_id);
-    const categoryItem = allQuestionCategories.value.find(cat => cat.name === category);
+    console.log("Player chose category:", category);
+
+    const categoryItem = availableCategories.value.find(cat => cat.name === category);
 
     // If either is missing, stop execution
     if (!player || !categoryItem) {
@@ -127,14 +148,26 @@ onMounted(() => {
     // Now TypeScript knows 'categoryItem' is defined
     categoryItem.isChosen = true;
 
-    console.log(allQuestionCategories.value);
-    player.chosenCategories.push(categoryItem)
+    console.log(availableCategories.value);
+    player.chosenCategories.push(categoryItem.name)
     console.log(player)
     
   });
 
   socket.on('screen_changed', (data: { screen: string }) => {
     activeScreen.value = data.screen
+  })
+
+  socket.on('question_asked', (data)=>{
+    chosenAlternative.value = undefined
+    activeQuestion.value = data.question
+    activeScreen.value = 'question'
+  })
+
+  socket.on('question_answered', ({ question_id, question_state, chosen_alternative }: { question_id: string, question_state: QuestionState, chosen_alternative: string })=>{
+    console.log("Question answered:", question_id, question_state, chosen_alternative);
+    answerQuestion(question_id, question_state);
+    chosenAlternative.value = chosen_alternative
   })
 
 })
@@ -145,9 +178,8 @@ onMounted(() => {
   <div v-if="!isGameReady" v-motion-fade>
     <button @click="createRoom">Open game room</button>
   </div>
-
   <div class="game-control-container" v-if="isGameReady">
-    <div v-if="activeScreen != 'controls'">
+    <div class="corner_button" v-if="activeScreen != 'controls'">
       <button @click="activeScreen = 'controls'">Back</button>
     </div>
     <div v-if="activeScreen == 'controls'" class="control-grid">
@@ -163,11 +195,14 @@ onMounted(() => {
     <div v-if="activeScreen == 'players'">
       <PlayerAdmin :room_id="roomId" :players="players" />
     </div>
-     <div v-if="activeScreen == 'question_selector'">
-      <QuestionSelection :allQuestionCategories="allQuestionCategories" :room_id="roomId" :players="players" />
+    <div v-if="activeScreen == 'question_selector'">
+      <QuestionSelection :allQuestionCategories="availableCategories" :room_id="roomId" :players="players" />
     </div>
     <div v-if="activeScreen == 'question_board'">
-      <QuestionBoard :room_id="roomId" :players="players" :isHostView="true" />
+      <QuestionBoard :allAvailableCategories="availableCategories" :room_id="roomId" :players="players" :isHostView="true" />
+    </div>
+    <div v-if="activeScreen == 'question' && activeQuestion">
+      <QuestionScreen :chosenAlternative="chosenAlternative" :room_id="roomId" :question="activeQuestion" :isHostView="true" />
     </div>
   </div>
   <Teleport to="body">
@@ -179,7 +214,7 @@ onMounted(() => {
           @closeThisModal="closeModal"
         />
       </div>
-  </div>
+    </div>
   </Teleport>
   
 </template>
@@ -219,6 +254,13 @@ onMounted(() => {
   gap: 15px;
   max-width: 100%;
   margin: 20px auto;
+}
+
+.corner_button{
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  z-index: 1000;
 }
 
 .control-button {
