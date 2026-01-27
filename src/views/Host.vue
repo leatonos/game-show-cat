@@ -12,6 +12,7 @@ import PlayerAdmin from './screens/PlayerAdmin.vue';
 import QuestionSelection from './screens/QuestionSelection.vue';
 import QuestionBoard from './screens/QuestionBoard.vue';
 import QuestionScreen from './screens/Question.vue';
+import WaveGame from './screens/WaveGame.vue';
 
 
 const createRoom = () => {
@@ -34,7 +35,6 @@ const players = ref<Player[]>([])
 const availableCategories = ref<QuestionCategory[]>(allQuestionCategories)
 const activeQuestion = ref<Question | undefined>(undefined)
 const chosenAlternative = ref<string | undefined>(undefined)
-
 
 //Functions
 const closeModal = () =>{
@@ -64,6 +64,7 @@ const buttons = ref<GridButton[]>([
   { label: 'Players', action: 'show_players' },
   { label: 'Show Questions', action: 'show_questions' },
   { label: 'Choose Questions', action: 'open_question_selector' },
+  { label: 'Show Wavegame', action: 'open_wavegame' },
   { label: "Syncronize Room", action: "synchronize_room"},
 ]);
 
@@ -75,7 +76,8 @@ const handleButtonClick = (action: string) => {
     show_players: () => showPlayers(),
     show_questions: () => showQuestions(),
     open_question_selector: () => openQuestionSelector(),
-    synchronize_room: () => synchronizeRoom()
+    synchronize_room: () => synchronizeRoom(),
+    open_wavegame: () => { socket.emit('change_screen', { room_id: roomId.value, screen: 'wave_game' })}
   };
 
   // Execute the function if it exists, otherwise log a warning
@@ -116,7 +118,7 @@ onMounted(() => {
     roomId.value = data.result
   })
 
-  socket.on('player_created',(newPlayer)=>{
+  socket.on('player_created',(newPlayer:Player)=>{
     players.value.push(newPlayer)
   })
 
@@ -175,20 +177,16 @@ onMounted(() => {
 </script>
 
 <template>
+  <div class="corner_button" v-if="activeScreen != 'controls'">
+    <button @click="activeScreen = 'controls'">Back</button>
+  </div>
   <div v-if="!isGameReady" v-motion-fade>
     <button @click="createRoom">Open game room</button>
   </div>
   <div class="game-control-container" v-if="isGameReady">
-    <div class="corner_button" v-if="activeScreen != 'controls'">
-      <button @click="activeScreen = 'controls'">Back</button>
-    </div>
+    <h1 v-if="activeScreen == 'controls'">Room: {{ roomId }}</h1>
     <div v-if="activeScreen == 'controls'" class="control-grid">
-      <button 
-        v-for="btn in buttons" 
-        :key="btn.action" 
-        class="control-button"
-        @click="handleButtonClick(btn.action)"
-      >
+      <button v-for="btn in buttons" :key="btn.action" class="control-button" @click="handleButtonClick(btn.action)">
         {{ btn.label }}
       </button>
     </div>
@@ -204,6 +202,9 @@ onMounted(() => {
     <div v-if="activeScreen == 'question' && activeQuestion">
       <QuestionScreen :chosenAlternative="chosenAlternative" :room_id="roomId" :question="activeQuestion" :isHostView="true" />
     </div>
+    <div v-if="activeScreen == 'wave_game'">
+      <WaveGame :room_id="roomId" :isHostView="true" />
+    </div>
   </div>
   <Teleport to="body">
     <div v-if="isModalOn" class="modal-background">
@@ -215,8 +216,7 @@ onMounted(() => {
         />
       </div>
     </div>
-  </Teleport>
-  
+  </Teleport> 
 </template>
 
 <style scoped>
@@ -243,17 +243,19 @@ onMounted(() => {
   border-radius: 8px;
   box-sizing: border-box;
 }
+
 .game-control-container {
   text-align: center;
   width: 100%;
-  height: 100vh;
+  height: calc(100vh);
+  box-sizing: border-box;
 }
 .control-grid {
   display: grid;
   grid-template-columns: repeat(8, 1fr); 
   gap: 15px;
   max-width: 100%;
-  margin: 20px auto;
+  margin: 20px;
 }
 
 .corner_button{

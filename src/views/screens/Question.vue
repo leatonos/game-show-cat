@@ -2,7 +2,7 @@
 
 import type { Question } from '../../plugins/questions';
 import { socket } from '../../plugins/plugins';
-
+import { onMounted, onUnmounted, ref } from 'vue';
 
 const props = defineProps<{
   isHostView: boolean
@@ -25,7 +25,6 @@ const answerQuestion = (alternative: string) => {
   });
 }
 
-
 const alternativeStyles = (alternative: string) => {
 
   if (!props.chosenAlternative || !props.question) return 'alternative'
@@ -45,7 +44,23 @@ const alternativeStyles = (alternative: string) => {
   return 'alternative'
 }
 
+const show_options = () => {
+  if (!props.room_id) return
+  console.log('showing alternatives')
+  socket.emit('reveal_alternatives', { room_id: props.room_id })
+}
 
+onMounted(() => {
+  socket.on('show_alternatives', () => {
+    isVisible.value = true
+  })
+})
+
+onUnmounted(() => {
+  socket.off('show_alternatives')
+})
+
+const isVisible = ref(false)
 
 </script>
 
@@ -54,14 +69,14 @@ const alternativeStyles = (alternative: string) => {
         <div class="question">
           <h3>{{ props.question?.question }}</h3>
         </div>
-        <div class="alternatives">
+        <div v-if="isVisible" class="alternatives">
             <div :class="alternativeStyles(alt)"  v-for="(alt, index) in props.question?.alternatives" :key="index" @click="answerQuestion(alt)">
                 <p>{{ alt }}</p>
             </div>
         </div>
         <div v-if="isHostView" class="host_controls">
-          <button @click="">Show Alternatives</button>
-          <button @click="socket.emit('change_screen', { room_id: props.room_id, screen: 'question_board' })">Back to Questions</button>
+          <button class="host_button" @click="show_options">Show Alternatives</button>
+          <button class="host_button" @click="socket.emit('change_screen', { room_id: props.room_id, screen: 'question_board' })">Back to Questions</button>
         </div>
    </main>
 </template>
@@ -138,5 +153,11 @@ const alternativeStyles = (alternative: string) => {
   background-color: black;
   color: white;
   cursor: pointer;
+}
+.host_controls{
+  padding: 10px;
+}
+.host_controls button:hover{
+  background-color: #333;
 }
 </style>

@@ -1,13 +1,10 @@
 <script setup lang="ts">
 
 import { socket } from '../../plugins/plugins';
+import type { Player } from '../../types';
 
 const props = defineProps<{
-  player: {
-    id: string;
-    name: string;
-    score: number;
-  }
+  player: Player
   isHostView?: boolean
   room_id?: string
 }>();
@@ -23,7 +20,7 @@ const deletePlayer = () => {
 </script>
 
 <template>
-    <div v-motion-fade class="player-item">
+    <div v-motion-fade class="player-item"> 
       <h3 class="player_name">{{ player.name }}</h3>
       <p class="score">{{ player.score }}</p>
       <div v-if="isHostView">
