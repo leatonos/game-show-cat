@@ -66,6 +66,9 @@ const isVisible = ref(false)
 
 <template>
    <main class="screen_container">
+        <div v-if="question?.image" class="question-image-container">
+          <img class="question-image" :src="`/question_images/${props.question?.image}`" />
+        </div>
         <div class="question">
           <h3>{{ props.question?.question }}</h3>
         </div>
@@ -92,7 +95,19 @@ const isVisible = ref(false)
     align-items: center;
     box-sizing: border-box;
 }
+
+.question-image-container{
+  width: 80%;
+}
+
+.question-image{
+  width: auto;
+  max-width: 100%;
+  max-height: 30vh;
+}
+
 .question{
+  width: 80%;
   display: flex;
   justify-content: center;
   align-items: center;
