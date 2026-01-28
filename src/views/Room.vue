@@ -10,6 +10,7 @@ import { allQuestionCategories, type QuestionCategory, type QuestionState } from
 import QuestionScreen from './screens/Question.vue'
 import type { Question } from '../plugins/questions'
 import QuestionBoard from './screens/QuestionBoard.vue'
+import WaveGame from './screens/WaveGame.vue'
 
 const route = useRoute()
 const roomId = route.params.roomId as string
@@ -124,6 +125,9 @@ onMounted(() => {
     </div>
     <div v-if="activeScreen == 'question'">
       <QuestionScreen :room_id="roomId" :isHostView="false" :chosenAlternative="chosen_alternative" :question="activeQuestion" />
+    </div>
+    <div v-if="activeScreen == 'wave_game'">
+      <WaveGame :isHostView="false" room_id="roomId" />
     </div>
   </main>
 </template>

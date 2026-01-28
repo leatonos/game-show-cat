@@ -10,7 +10,7 @@ const props = defineProps<{
 
 // --- STATE --- //
 const isVisible = ref(true)
-const range = ref(-45)
+const range = ref(0)
 const pointer = ref(0)
 const opposites = ref<Opposites>({
     left: 'Anything',
@@ -19,12 +19,23 @@ const opposites = ref<Opposites>({
 
 // --- SOCKET LOGIC --- //
 onMounted(() => {
-  socket.on('show_range', () => { ToggleRange() })
-  socket.on('got_random_range', () => { getRandomRange() })
-  socket.on('got_random_opposites', () => { getRandomOpposites() })
-  socket.on('pointer_moved', ({ degrees }: { degrees: number }) => {
-    pointer.value += degrees
-  })
+    
+    socket.on('show_range', () => { 
+        isVisible.value = !isVisible.value
+    })
+
+    socket.on('got_random_range',({ random_number }: { random_number: number }) => {
+        range.value = random_number
+    })
+
+    socket.on('got_random_opposites',({ random_index }: { random_index: number }) => {
+        opposites.value = oppositesList[random_index]!
+    })
+
+    socket.on('pointer_moved', ({ degrees }: { degrees: number }) => {
+        pointer.value += degrees
+    })
+
 })
 
 onUnmounted(() => {
@@ -36,20 +47,19 @@ onUnmounted(() => {
 
 // --- FUNCTIONS --- //
 const getRandomRange = () => {
-    range.value = Math.floor(Math.random() * 181) - 90;
+    socket.emit('get_random_range',{'room_id':props.room_id})
 }
 
 const getRandomOpposites = () => {
-    const randomIndex = Math.floor(Math.random() * oppositesList.length);
-    opposites.value = oppositesList[randomIndex]!;
+    socket.emit('get_random_opposites', {'room_id':props.room_id,'length': oppositesList.length,})
 }
 
 const movePointer = (degrees: number) => {
-    pointer.value += degrees
+    socket.emit("move_pointer",{degrees:degrees,room_id:props.room_id})
 }
 
 const ToggleRange = () =>{
-    isVisible.value = !isVisible.value
+    socket.emit('toggle_range',{room_id:props.room_id})
 }
 
 </script>
@@ -173,7 +183,7 @@ const ToggleRange = () =>{
   flex-direction: column;
   padding: 20px;
   gap: 10px;
-  z-index: 1000;
+  z-index: 1;
 }
 
 button {
