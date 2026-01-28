@@ -114,13 +114,13 @@ const ToggleRange = () =>{
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  background-color: #1a1a1a; /* Added so you can see the layout */
+  background-color: #1a1a1a;
   overflow: hidden;
 }
 
 .wave_dial_container {
   position: relative;
-  height: 30vw; /* Exact half of the width for a semicircle */
+  height: 30vw; /* half of width for semicircle */
   width: 60vw;
   margin-bottom: 30px;
 }
@@ -131,7 +131,7 @@ const ToggleRange = () =>{
   left: 0;
   width: 100%;
   height: 100%;
-  overflow: hidden; /* This is your mask */
+  overflow: hidden;
   z-index: 2;
 }
 
@@ -143,10 +143,13 @@ const ToggleRange = () =>{
 }
 
 .big_circle { z-index: 1; }
-.range { z-index: 2; transform-origin: 50% 100%; }
+.range {
+  z-index: 2;
+  transform-origin: 50% 100%;
+}
 .pointer {
-    z-index: 3; 
-    transform-origin: 50% 100%;
+  z-index: 3;
+  transform-origin: 50% 100%;
 }
 .small_circle { z-index: 4; }
 
@@ -190,4 +193,47 @@ button {
   padding: 10px;
   cursor: pointer;
 }
+
+/* ---------------------------
+   Mobile: full screen controls
+---------------------------- */
+@media (max-width: 768px), (max-height: 500px) {
+  .host_controls {
+    width: 100vw;
+    height: 100vh;
+    padding: 16px;
+    z-index: 999;
+    box-sizing: border-box;
+
+    /* key changes */
+    justify-content: flex-start;
+    overflow-y: auto;
+  }
+
+  .host_controls h3 {
+    margin-top: 8px;
+    margin-bottom: 4px;
+  }
+
+  .host_controls button {
+    width: 100%;
+    padding: 12px;
+    font-size: 1rem;
+  }
+
+  /* 👇 grid layout for buttons */
+  .host_controls {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+
+  /* headers span full width */
+  .host_controls h3 {
+    grid-column: 1 / -1;
+    text-align: center;
+  }
+}
+
+
 </style>

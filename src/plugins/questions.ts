@@ -7,6 +7,7 @@ export type Question = {
   alternatives: string[];
   correct: string;
   state: QuestionState
+  image?:string
 }
 
 export type QuestionState = 'unasked' | 'right' | 'wrong';
@@ -195,11 +196,11 @@ export const allQuestionCategories: QuestionCategory[] = [
       },
       {
         id: 'os-5',
-        question: 'Who is the youngest person to ever win a competitive Oscar?',
-        question_type: 'text',
+        question: 'Fernanda Montenegro, mother of Fernanda Torres became the first Brazilian and first Latin American to be nominated for the Academy Award for Best Actress. With what movie was that?',
+        question_type: 'image',
         category: 'Oscars',
         value: 500,
-        alternatives: ['Shirley Temple', 'Tatum O’Neal', 'Anna Paquin', 'Justin Henry'],
+        alternatives: ['Central do Brasil', 'Ainda estou aqui', 'Vitória', 'Senhora do destino'],
         correct: 'Tatum O’Neal',
         state: 'unasked',
       },
