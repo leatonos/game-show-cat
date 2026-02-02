@@ -13,6 +13,7 @@ import QuestionSelection from './screens/QuestionSelection.vue';
 import QuestionBoard from './screens/QuestionBoard.vue';
 import QuestionScreen from './screens/Question.vue';
 import WaveGame from './screens/WaveGame.vue';
+import SecretWord from './screens/SecretWord.vue';
 
 
 const createRoom = () => {
@@ -65,6 +66,7 @@ const buttons = ref<GridButton[]>([
   { label: 'Show Questions', action: 'show_questions' },
   { label: 'Choose Questions', action: 'open_question_selector' },
   { label: 'Show Wavegame', action: 'open_wavegame' },
+  { label: "Show WordGame", action: "open_wordgame"},
   { label: "Syncronize Room", action: "synchronize_room"},
 ]);
 
@@ -77,7 +79,8 @@ const handleButtonClick = (action: string) => {
     show_questions: () => showQuestions(),
     open_question_selector: () => openQuestionSelector(),
     synchronize_room: () => synchronizeRoom(),
-    open_wavegame: () => { socket.emit('change_screen', { room_id: roomId.value, screen: 'wave_game' })}
+    open_wavegame: () => { socket.emit('change_screen', { room_id: roomId.value, screen: 'wave_game' })},
+    open_wordgame: () => { socket.emit('change_screen', { room_id: roomId.value, screen: 'word_game' })}
   };
 
   // Execute the function if it exists, otherwise log a warning
@@ -205,6 +208,9 @@ onMounted(() => {
     <div v-if="activeScreen == 'wave_game'">
       <WaveGame :room_id="roomId" :isHostView="true" />
     </div>
+    <div v-if="activeScreen == 'word_game'">
+      <SecretWord :room_id="roomId" :isHostView="true" />
+    </div>
   </div>
   <Teleport to="body">
     <div v-if="isModalOn" class="modal-background">
@@ -283,5 +289,23 @@ onMounted(() => {
   border: none;
   border-radius: 12px;
   cursor: pointer;
+}
+
+/* Phone */
+@media (max-width: 768px) {
+  .control-grid {
+    grid-template-columns: repeat(4, 1fr); /* or 2 if buttons are big */
+    gap: 10px;
+    margin: 10px;
+  }
+}
+
+/* Small phones */
+@media (max-width: 480px) {
+  .control-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+    margin: 8px;
+  }
 }
 </style>

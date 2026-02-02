@@ -41,6 +41,7 @@ const availableCategories = computed(() => {
     <div class="question_selection_component">
         <div class="player_list">
             <div class="player_box" v-for="(player, index) in props.players" :key="player.id" :class="{ active: index === playerTurn }" @click="playerTurn = index">
+                <span class="player_badge">{{ player.chosenCategories.length }}</span>
                 <p>{{ player.name }}</p>
             </div>
         </div>
@@ -78,6 +79,7 @@ const availableCategories = computed(() => {
 }
 
 .player_box {
+  position: relative; 
   background-color: #1a1a1a;
   border: 1px solid #333;
   padding: 12px;
@@ -96,6 +98,33 @@ const availableCategories = computed(() => {
   color: black;
   font-weight: bold;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
+}
+
+/* Badge (ball) */
+.player_badge {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+
+  background-color: #4caf50;
+  color: #000;
+  font-size: 0.75rem;
+  font-weight: bold;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+}
+
+/* Optional: active player badge pop */
+.player_box.active .player_badge {
+  background-color: #fff;
 }
 
 /* CATEGORY GRID — FIXED */

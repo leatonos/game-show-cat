@@ -10,6 +10,7 @@ const props = defineProps<{
 
 // --- STATE --- //
 const isVisible = ref(true)
+const isRollingOpposites = ref(false)
 const range = ref(0)
 const pointer = ref(0)
 const opposites = ref<Opposites>({
@@ -24,17 +25,37 @@ onMounted(() => {
         isVisible.value = !isVisible.value
     })
 
-    socket.on('got_random_range',({ random_number }: { random_number: number }) => {
-        range.value = random_number
-    })
+  socket.on('got_random_range', ({ random_number }: { random_number: number }) => {
+    range.value = random_number
+  })
 
-    socket.on('got_random_opposites',({ random_index }: { random_index: number }) => {
-        opposites.value = oppositesList[random_index]!
-    })
+  socket.on('got_random_opposites', ({ random_index }: { random_index: number }) => {
+    if (isRollingOpposites.value) return
+    isRollingOpposites.value = true
 
-    socket.on('pointer_moved', ({ degrees }: { degrees: number }) => {
-        pointer.value += degrees
-    })
+    let ticks = 0
+    const maxTicks = 15
+
+    const shuffle = setInterval(() => {
+      const i = Math.floor(Math.random() * oppositesList.length)
+      opposites.value = oppositesList[i]!
+      ticks++
+
+      if (ticks >= maxTicks) {
+        clearInterval(shuffle)
+
+        setTimeout(() => {
+          opposites.value = oppositesList[random_index]!
+          isRollingOpposites.value = false
+        }, 200)
+      }
+     }, 90)
+  })
+
+
+  socket.on('pointer_moved', ({ degrees }: { degrees: number }) => {
+      pointer.value += degrees
+  })
 
 })
 

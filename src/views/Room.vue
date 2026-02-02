@@ -11,6 +11,7 @@ import QuestionScreen from './screens/Question.vue'
 import type { Question } from '../plugins/questions'
 import QuestionBoard from './screens/QuestionBoard.vue'
 import WaveGame from './screens/WaveGame.vue'
+import SecretWord from './screens/SecretWord.vue'
 
 const route = useRoute()
 const roomId = route.params.roomId as string
@@ -128,6 +129,9 @@ onMounted(() => {
     </div>
     <div v-if="activeScreen == 'wave_game'">
       <WaveGame :isHostView="false" room_id="roomId" />
+    </div>
+    <div v-if="activeScreen == 'word_game'">
+      <SecretWord :isHostView="false" room_id="roomId" />
     </div>
   </main>
 </template>
