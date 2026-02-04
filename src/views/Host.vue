@@ -1,6 +1,6 @@
 <script setup lang="ts">
 
-import { onMounted, ref } from 'vue';
+import { onMounted, ref, watch } from 'vue';
 import {socket} from '../plugins/plugins';
 //import { getRandomString } from '../plugins/plugins';
 import NewPlayer from './modals/NewPlayer.vue';
@@ -18,7 +18,7 @@ import SecretWord from './screens/SecretWord.vue';
 
 const createRoom = () => {
   //const roomId = getRandomString(5)
-  const roomIdtest = 'test'
+  const roomIdtest = 'game'
   socket.emit('create_room', roomIdtest );
 };
 
@@ -33,7 +33,7 @@ const roomId = ref<string>('Game not ready')
 const isModalOn = ref<boolean>(false)
 const activeScreen = ref<string>('controls')
 const players = ref<Player[]>([])
-const availableCategories = ref<QuestionCategory[]>(allQuestionCategories)
+const availableCategories = ref([...allQuestionCategories])
 const activeQuestion = ref<Question | undefined>(undefined)
 const chosenAlternative = ref<string | undefined>(undefined)
 
@@ -58,15 +58,25 @@ const answerQuestion = (questionId: string, state: QuestionState) => {
   }
 }
 
+//Watcher makes updates in localStorage
+watch(
+  [players, availableCategories],
+  ([newPlayers, newCategories]) => {
+    localStorage.setItem('players', JSON.stringify(newPlayers))
+    localStorage.setItem('availableCategories', JSON.stringify(newCategories))
+  },
+  { deep: true }
+)
 
 //Buttons list
 const buttons = ref<GridButton[]>([
-  { label: 'Add Player', action: 'add_player' },
   { label: 'Players', action: 'show_players' },
   { label: 'Show Questions', action: 'show_questions' },
   { label: 'Choose Questions', action: 'open_question_selector' },
   { label: 'Show Wavegame', action: 'open_wavegame' },
   { label: "Show WordGame", action: "open_wordgame"},
+  { label: "Load Saved Data", action: "load_saved_data"},
+  { label: "Delete Saved Data & Reset Room", action: "delete_saved_data"},
   { label: "Syncronize Room", action: "synchronize_room"},
 ]);
 
@@ -79,6 +89,8 @@ const handleButtonClick = (action: string) => {
     show_questions: () => showQuestions(),
     open_question_selector: () => openQuestionSelector(),
     synchronize_room: () => synchronizeRoom(),
+    load_saved_data: () => loadSavedData(),
+    delete_saved_data: () => deleteSavedData(),
     open_wavegame: () => { socket.emit('change_screen', { room_id: roomId.value, screen: 'wave_game' })},
     open_wordgame: () => { socket.emit('change_screen', { room_id: roomId.value, screen: 'word_game' })}
   };
@@ -108,6 +120,23 @@ const synchronizeRoom = () => {
   console.log("Synchronizing room data...");
   socket.emit('synchronize_room', { 'players': players.value, 'room_id': roomId.value, 'all_categories': availableCategories.value });
 }
+
+//Load Saved Data
+const loadSavedData = () =>{
+  players.value =  JSON.parse(localStorage.getItem('players') || '[]'),
+  availableCategories.value = JSON.parse(localStorage.getItem('availableCategories') || '[]')
+}
+//Load Saved Data
+const deleteSavedData = () =>{
+  //Deletes Saved Data
+  localStorage.clear()
+  //Resets States
+  availableCategories.value = allQuestionCategories
+  players.value = []
+  //Re-sync Room
+  synchronizeRoom()
+}
+
 
 //Socket Listeners
 onMounted(() => {
@@ -187,12 +216,12 @@ onMounted(() => {
     <button @click="createRoom">Open game room</button>
   </div>
   <div class="game-control-container" v-if="isGameReady">
-    <h1 v-if="activeScreen == 'controls'">Room: {{ roomId }}</h1>
     <div v-if="activeScreen == 'controls'" class="control-grid">
       <button v-for="btn in buttons" :key="btn.action" class="control-button" @click="handleButtonClick(btn.action)">
         {{ btn.label }}
       </button>
     </div>
+    
     <div v-if="activeScreen == 'players'">
       <PlayerAdmin :room_id="roomId" :players="players" />
     </div>
@@ -251,61 +280,51 @@ onMounted(() => {
 }
 
 .game-control-container {
-  text-align: center;
   width: 100%;
-  height: calc(100vh);
+  min-height: 100dvh;
   box-sizing: border-box;
 }
+
 .control-grid {
   display: grid;
-  grid-template-columns: repeat(8, 1fr); 
-  gap: 15px;
-  max-width: 100%;
-  margin: 20px;
+  grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+  gap: clamp(8px, 2vw, 16px);
+  padding: clamp(8px, 2vw, 20px);
+  max-width: 1200px;
+  margin: 0 auto;
 }
 
-.corner_button{
-  position: absolute;
-  top: 10px;
-  left: 10px;
+.corner_button {
+  position: fixed;
+  top: env(safe-area-inset-top, 10px);
+  left: env(safe-area-inset-left, 10px);
   z-index: 1000;
 }
 
+.corner_button button {
+  padding: 10px 14px;
+  font-size: 14px;
+  border-radius: 8px;
+}
+
 .control-button {
-  /* Layout */
   display: flex;
   justify-content: center;
   align-items: center;
-  
-  /* Sizing & Spacing */
-  padding: 20px;
-  width: 100%;
-  aspect-ratio: 1 / 1; /* Optional: Makes buttons perfect squares */
 
-  /* Visuals */
+  aspect-ratio: 1 / 1;
+  padding: clamp(12px, 3vw, 20px);
+
+  font-size: clamp(14px, 2.5vw, 18px);
   font-weight: bold;
+
   background-color: black;
   color: white;
   border: none;
-  border-radius: 12px;
+  border-radius: clamp(8px, 2vw, 14px);
   cursor: pointer;
+
+  touch-action: manipulation;
 }
 
-/* Phone */
-@media (max-width: 768px) {
-  .control-grid {
-    grid-template-columns: repeat(4, 1fr); /* or 2 if buttons are big */
-    gap: 10px;
-    margin: 10px;
-  }
-}
-
-/* Small phones */
-@media (max-width: 480px) {
-  .control-grid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 8px;
-    margin: 8px;
-  }
-}
 </style>

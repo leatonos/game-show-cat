@@ -17,7 +17,7 @@ const route = useRoute()
 const roomId = route.params.roomId as string
 const players = ref<Player[]>([])
 const activeScreen = ref<string>('question_setup')
-const availableCategories = ref(allQuestionCategories)
+const availableCategories = ref([...allQuestionCategories])
 const chosen_alternative = ref<string | undefined>(undefined)
 const activeQuestion = ref<Question | undefined>(undefined)
 
@@ -145,9 +145,10 @@ onMounted(() => {
 
 .players-container {
   display: flex;
+  padding: 10px;
   flex-wrap: wrap;
   justify-content: center;
-  gap: 10px;
+  gap: 30px;
   margin-bottom: 20px;
   position: relative; /* Important for internal transitions */
 }

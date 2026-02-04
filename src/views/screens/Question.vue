@@ -175,4 +175,20 @@ const isVisible = ref(false)
 .host_controls button:hover{
   background-color: #333;
 }
+
+/* ---------------- SMALL PHONES ---------------- */
+@media (max-width: 480px) {
+ .alternatives{
+  width: 100%;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 30px;
+  box-sizing: border-box;
+ }
+ .alternative{
+  width: 100%;
+ }
+}
+
 </style>

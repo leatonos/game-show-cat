@@ -165,12 +165,12 @@ function timeText(seconds: number) {
 }
 
 .timer_text h1{
-  font-size: 120px;
+  font-size: clamp(4rem, 12vw, 16rem);
   margin: 0;
 }
 
 .secret_word h2{
-  font-size: 8vw;
+  font-size: clamp(4rem, 8vw, 16rem);
   margin: 0;
 }
 

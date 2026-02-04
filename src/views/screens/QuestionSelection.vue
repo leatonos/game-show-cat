@@ -60,26 +60,31 @@ const availableCategories = computed(() => {
 
 <style scoped>
 
+/* ---------------- SCREEN ---------------- */
 .question_selection_component {
   display: flex;
   gap: 16px;
-  height: 100vh;
+  height: 100dvh;
   background-color: #121212;
-  padding: 30px;
+  padding: clamp(12px, 3vw, 30px);
   box-sizing: border-box;
+  overflow: hidden;
 }
 
-/* PLAYER LIST */
+/* ---------------- PLAYER LIST ---------------- */
 .player_list {
+  flex: 0 0 180px;
   display: flex;
   flex-direction: column;
   gap: 8px;
-  width: 180px;
-  flex-shrink: 0;
+  overflow-y: auto;
+  padding: 10px;
+  box-sizing: border-box;
 }
 
+/* PLAYER CARD */
 .player_box {
-  position: relative; 
+  position: relative;
   background-color: #1a1a1a;
   border: 1px solid #333;
   padding: 12px;
@@ -87,61 +92,51 @@ const availableCategories = computed(() => {
   text-align: center;
   cursor: pointer;
   transition: background-color 0.2s ease, transform 0.15s ease;
-}
-
-.player_box:hover {
-  transform: scale(1.02);
+  box-sizing: border-box;
 }
 
 .player_box.active {
   background-color: #4caf50;
   color: black;
   font-weight: bold;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
 }
 
-/* Badge (ball) */
+/* PLAYER BADGE */
 .player_badge {
   position: absolute;
   top: -6px;
   right: -6px;
-
   width: 20px;
   height: 20px;
   border-radius: 50%;
-
   background-color: #4caf50;
   color: #000;
   font-size: 0.75rem;
   font-weight: bold;
-
   display: flex;
   align-items: center;
   justify-content: center;
-
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
 }
 
-/* Optional: active player badge pop */
 .player_box.active .player_badge {
   background-color: #fff;
 }
 
-/* CATEGORY GRID — FIXED */
+/* ---------------- CATEGORY GRID ---------------- */
 .category_list {
   flex: 1;
   display: grid;
-  grid-template-columns: repeat(3, minmax(240px, 1fr));
-  gap: 12px;
-  align-content: start; /* 🔑 prevents vertical spreading */
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: clamp(8px, 2vw, 16px);
+  align-content: start;
+  overflow-y: auto;
 }
 
-/* CATEGORY TILE — SIMPLE & STABLE */
+/* CATEGORY TILE */
 .category_box {
   background-color: #1e1e1e;
   border: 1px solid #333;
-  border-radius: 6px;
-  min-height: 70px;
+  border-radius: 8px;
   padding: 12px;
   cursor: pointer;
 
@@ -161,26 +156,38 @@ const availableCategories = computed(() => {
   margin: 0;
   color: #fff;
   font-weight: bold;
-  font-size: 2.3rem;
+  font-size: clamp(0.9rem, 3vw, 2.2rem);
   text-align: center;
 }
 
-/* SMALL SCREENS */
-@media (max-width: 800px), (max-height: 600px) {
+/* ---------------- MOBILE (PORTRAIT) ---------------- */
+@media (max-width: 768px) {
+  .question_selection_component {
+    flex-direction: column;
+  }
+
   .player_list {
-    width: 140px;
+    flex: none;
+    flex-direction: row;
+    gap: 8px;
+    overflow-x: auto;
+    padding-bottom: 8px;
+  }
+
+  .player_box {
+    min-width: 120px;
+    flex-shrink: 0;
   }
 
   .category_list {
-    grid-template-columns: repeat(4, minmax(120px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
   }
+}
 
-  .category_box {
-    min-height: 60px;
-  }
-
+/* ---------------- SMALL PHONES ---------------- */
+@media (max-width: 480px) {
   .category_box p {
-    font-size: 0.9rem;
+    font-size: 1.1rem;
   }
 }
 
