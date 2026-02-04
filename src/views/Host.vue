@@ -5,7 +5,7 @@ import {socket} from '../plugins/plugins';
 //import { getRandomString } from '../plugins/plugins';
 import NewPlayer from './modals/NewPlayer.vue';
 import type { Player } from '../types';
-import { allQuestionCategories, type Question, type QuestionCategory, type QuestionState } from '../plugins/questions';
+import { allQuestionCategories, type Question, type QuestionState } from '../plugins/questions';
 
 //Screen Components
 import PlayerAdmin from './screens/PlayerAdmin.vue';
