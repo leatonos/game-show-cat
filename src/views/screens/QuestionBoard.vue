@@ -20,7 +20,6 @@ const currentPlayer = computed(() => {
   return props.players[playerTurn.value];
 });
 
-
 //find all questions for the current player 
 const questionBoard = computed(() => {
   const player = currentPlayer.value;

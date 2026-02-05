@@ -18,6 +18,10 @@ const opposites = ref<Opposites>({
     right: 'Everything'
 })
 
+//Delay function
+const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms))
+
+
 // --- SOCKET LOGIC --- //
 onMounted(() => {
     
@@ -53,9 +57,15 @@ onMounted(() => {
   })
 
 
-  socket.on('pointer_moved', ({ degrees }: { degrees: number }) => {
-      pointer.value += degrees
-  })
+  socket.on('pointer_moved', async ({ degrees }: { degrees: number }) => {
+    pointer.value = -90
+    await delay(600)
+
+    pointer.value = 90
+    await delay(600)
+
+    pointer.value += degrees
+})
 
 })
 
