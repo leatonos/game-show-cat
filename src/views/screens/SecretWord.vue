@@ -113,7 +113,6 @@ onMounted(() => {
 
 })
 
-
 // ---------------- TIMER TEXT ----------------
 function timeText(seconds: number) {
   const mins = Math.floor(seconds / 60)

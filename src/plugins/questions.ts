@@ -16,6 +16,7 @@ export type QuestionCategory = {
   name: string;
   questions: Question[];
   isChosen: boolean;
+  wildCardLocation?:number
 }
 
 export const allQuestionCategories: QuestionCategory[] = [

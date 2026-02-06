@@ -1,52 +1,57 @@
 <script setup lang="ts">
+import type { WildCardType } from '../../plugins/wildcards';
 
+const props = defineProps<{
+  wildCard:WildCardType
+}>();
+
+
+const imageLink = props.wildCard.image
+const cardColor = props.wildCard.color
 
 </script>
 
 <template>
-  <main class="card">
-    <div class="hero_image">
-        <img />
+  <main :style="{backgroundColor: `${cardColor}`}" class="card">
+    <div class="card_image_container">
+        <img class="card_image" :src="imageLink" />
     </div>
-
-    <div class="description">
-        
+    <div class="description_container">
+      <h2>{{ props.wildCard.name }}</h2>
+      <p>{{ props.wildCard.description }}</p>
+      <i>{{ props.wildCard.useCondition }}</i>
     </div>
   </main>
 </template>
 
 <style scoped>
 
-.room {
-  width: 100%;
-  padding: 0px;
-}
-
-.players-container {
+.card{
   display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 10px;
-  margin-bottom: 20px;
-  position: relative; /* Important for internal transitions */
+  flex-direction: column;
+  width: 35%;
+  max-width: 240px;
+  padding: 2em;
+  border-radius: 12px;
 }
 
-/* 4. The Magic: Smooth movement for elements changing position */
-.list-move, /* apply transition to moving elements */
-.list-enter-active,
-.list-leave-active {
-  transition: all 0.5s ease;
+.card_image_container{
+  width: 100%;
 }
 
-.list-enter-from,
-.list-leave-to {
-  opacity: 0;
-  transform: translateY(80px);
+.card_image{
+  width: 100%;
+  height:auto;
+  border-radius: 6px;
 }
 
-/* ensure leaving items are taken out of layout flow so that moving
-   animations can be calculated correctly. */
-.list-leave-active {
-  position: absolute;
+.description_container p{
+  text-align:left;
 }
+
+.description_container i{
+  text-align:left;
+}
+
+
 </style>

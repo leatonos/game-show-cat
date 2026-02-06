@@ -21,6 +21,22 @@ const opposites = ref<Opposites>({
 //Delay function
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms))
 
+//Range Animation
+async function animateRangeTo (finalNumber:number){
+
+  const numberOfRuns = 2
+
+   for (let i = 0;i<numberOfRuns;i++){
+    range.value = -90
+    await delay(850)
+    range.value = 90
+    await delay(850)
+   }
+
+   range.value = finalNumber
+    
+}
+
 
 // --- SOCKET LOGIC --- //
 onMounted(() => {
@@ -29,8 +45,8 @@ onMounted(() => {
         isVisible.value = !isVisible.value
     })
 
-  socket.on('got_random_range', ({ random_number }: { random_number: number }) => {
-    range.value = random_number
+  socket.on('got_random_range', async ({ random_number }: { random_number: number }) => {
+      await animateRangeTo(random_number)
   })
 
   socket.on('got_random_opposites', ({ random_index }: { random_index: number }) => {
@@ -47,7 +63,6 @@ onMounted(() => {
 
       if (ticks >= maxTicks) {
         clearInterval(shuffle)
-
         setTimeout(() => {
           opposites.value = oppositesList[random_index]!
           isRollingOpposites.value = false
@@ -57,13 +72,7 @@ onMounted(() => {
   })
 
 
-  socket.on('pointer_moved', async ({ degrees }: { degrees: number }) => {
-    pointer.value = -90
-    await delay(600)
-
-    pointer.value = 90
-    await delay(600)
-
+  socket.on('pointer_moved', ({ degrees }: { degrees: number }) => {
     pointer.value += degrees
 })
 
@@ -107,12 +116,11 @@ const ToggleRange = () =>{
             transition: 'transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)' 
           }"
         />  
-
         <img 
           v-if="isVisible"class="dial_part range" src="../../assets/wave-game/range.svg" 
           :style="{ 
             transform: `rotate(${range}deg)`,
-            transition: 'transform 0.6s ease-out'
+            transition: 'transform .8s ease-out'
           }"
         />
       </div>

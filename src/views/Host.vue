@@ -3,9 +3,10 @@
 import { onMounted, ref, watch } from 'vue';
 import {socket} from '../plugins/plugins';
 //import { getRandomString } from '../plugins/plugins';
-import NewPlayer from './modals/NewPlayer.vue';
 import type { Player } from '../types';
 import { allQuestionCategories, type Question, type QuestionState } from '../plugins/questions';
+import {type WildCardType } from '../plugins/wildcards';
+import WildCardModal from './modals/WildCardModal.vue';
 
 //Screen Components
 import PlayerAdmin from './screens/PlayerAdmin.vue';
@@ -36,13 +37,8 @@ const players = ref<Player[]>([])
 const availableCategories = ref([...allQuestionCategories])
 const activeQuestion = ref<Question | undefined>(undefined)
 const chosenAlternative = ref<string | undefined>(undefined)
-
-//Functions
-const closeModal = () =>{
-  console.log("Testing close btn")
-  isModalOn.value = false
-  activeScreen.value = 'controls'
-}
+const currentWildCard = ref<WildCardType | undefined>(undefined)
+const isWildCardVisible = ref<boolean>(false)
 
 const answerQuestion = (questionId: string, state: QuestionState) => {
 
@@ -179,10 +175,13 @@ onMounted(() => {
       return;
     }
 
-    // Now TypeScript knows 'categoryItem' is defined
+    //Set this category as Chosen so other players cannot pick it
     categoryItem.isChosen = true;
 
-    console.log(availableCategories.value);
+    //Roll a die to define what question contains a wildcard
+    const wildCardLocation = Math.floor(Math.random() * 5)
+    categoryItem.wildCardLocation = wildCardLocation
+    
     player.chosenCategories.push(categoryItem.name)
     console.log(player)
     
@@ -202,6 +201,17 @@ onMounted(() => {
     console.log("Question answered:", question_id, question_state, chosen_alternative);
     answerQuestion(question_id, question_state);
     chosenAlternative.value = chosen_alternative
+  })
+
+  socket.on('wild_card_appear', (data: { wild_card: WildCardType }) => {
+    currentWildCard.value = data.wild_card
+    isWildCardVisible.value = true;
+    console.log(data.wild_card)
+  })
+  
+  socket.on('wild_card_hidden', () => {
+    currentWildCard.value = undefined
+    isWildCardVisible.value = false;
   })
 
 })
@@ -241,17 +251,8 @@ onMounted(() => {
       <SecretWord :room_id="roomId" :isHostView="true" />
     </div>
   </div>
-  <Teleport to="body">
-    <div v-if="isModalOn" class="modal-background">
-      <div class="modal-container">
-        <NewPlayer
-          :roomId="roomId"
-          v-if="activeScreen == 'add_player'"
-          @closeThisModal="closeModal"
-        />
-      </div>
-    </div>
-  </Teleport> 
+  <WildCardModal v-if="currentWildCard" :roomId="roomId" :wildCard="currentWildCard" :isVisible="isWildCardVisible" />
+  
 </template>
 
 <style scoped>
