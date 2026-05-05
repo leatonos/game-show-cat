@@ -3,6 +3,7 @@
 import type { Question } from '../../plugins/questions';
 import { socket } from '../../plugins/plugins';
 import { onMounted, onUnmounted, ref } from 'vue';
+import { playKeySound } from '../../plugins/soundEffects';
 
 const props = defineProps<{
   isHostView: boolean
@@ -16,6 +17,12 @@ const answerQuestion = (alternative: string) => {
   if (props.chosenAlternative) return
 
   const question_state = alternative === props.question.correct ? 'correct' : 'wrong'
+
+  if(question_state == 'correct'){
+    playKeySound('1')
+  }else{
+    playKeySound('2')
+  }
 
   socket.emit('answer_question', {  
     'question_id': props.question.id, 
@@ -69,6 +76,16 @@ const isVisible = ref(false)
         <div v-if="question?.image" class="question-image-container">
           <img class="question-image" :src="`/question_images/${props.question?.image}`" />
         </div>
+        <div v-if="question?.video" class="video-container">
+          <div class="video-wrapper">
+            <iframe
+              :src="props.question?.video"
+              frameborder="0"
+              allow="autoplay; fullscreen; picture-in-picture"
+              allowfullscreen
+            ></iframe>
+          </div>
+        </div>
         <div class="question">
           <h3>{{ props.question?.question }}</h3>
         </div>
@@ -88,7 +105,7 @@ const isVisible = ref(false)
 
 .screen_container{
     width: 100%;
-    height: 100vh;
+    height: 100dvh;
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -102,8 +119,7 @@ const isVisible = ref(false)
 
 .question-image{
   width: auto;
-  max-width: 100%;
-  max-height: 30vh;
+  max-height: 30dvh;
 }
 
 .question{
@@ -174,6 +190,32 @@ const isVisible = ref(false)
 }
 .host_controls button:hover{
   background-color: #333;
+}
+
+.video-container {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  margin: 20px 0;
+}
+
+/* 16:9 responsive video */
+.video-wrapper {
+  position: relative;
+  width: 40%;
+  aspect-ratio: 16 / 9;
+  background: black;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+}
+
+.video-wrapper iframe {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: none;
 }
 
 /* ---------------- SMALL PHONES ---------------- */

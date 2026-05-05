@@ -41,9 +41,9 @@ async function animateRangeTo (finalNumber:number){
 // --- SOCKET LOGIC --- //
 onMounted(() => {
     
-    socket.on('show_range', () => { 
-        isVisible.value = !isVisible.value
-    })
+  socket.on('show_range', () => { 
+      isVisible.value = !isVisible.value
+  })
 
   socket.on('got_random_range', async ({ random_number }: { random_number: number }) => {
       await animateRangeTo(random_number)
@@ -71,10 +71,9 @@ onMounted(() => {
      }, 90)
   })
 
-
   socket.on('pointer_moved', ({ degrees }: { degrees: number }) => {
     pointer.value += degrees
-})
+  })
 
 })
 

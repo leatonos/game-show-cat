@@ -15,6 +15,8 @@ import QuestionBoard from './screens/QuestionBoard.vue';
 import QuestionScreen from './screens/Question.vue';
 import WaveGame from './screens/WaveGame.vue';
 import SecretWord from './screens/SecretWord.vue';
+import { soundCheck } from '../plugins/soundEffects';
+import Timer from './screens/Timer.vue';
 
 
 const createRoom = () => {
@@ -71,6 +73,7 @@ const buttons = ref<GridButton[]>([
   { label: 'Choose Questions', action: 'open_question_selector' },
   { label: 'Show Wavegame', action: 'open_wavegame' },
   { label: "Show WordGame", action: "open_wordgame"},
+  { label: "Show Timer", action: "open_timer"},
   { label: "Load Saved Data", action: "load_saved_data"},
   { label: "Delete Saved Data & Reset Room", action: "delete_saved_data"},
   { label: "Syncronize Room", action: "synchronize_room"},
@@ -88,6 +91,7 @@ const handleButtonClick = (action: string) => {
     load_saved_data: () => loadSavedData(),
     delete_saved_data: () => deleteSavedData(),
     open_wavegame: () => { socket.emit('change_screen', { room_id: roomId.value, screen: 'wave_game' })},
+    open_timer: () => { socket.emit('change_screen', { room_id: roomId.value, screen: 'timer' })},
     open_wordgame: () => { socket.emit('change_screen', { room_id: roomId.value, screen: 'word_game' })}
   };
 
@@ -214,6 +218,25 @@ onMounted(() => {
     isWildCardVisible.value = false;
   })
 
+  socket.on('sound_effect',(data:{sound:string})=>{
+    console.log(data)
+  })
+
+})
+
+//Key Press Listeners
+const handleKey = (e: KeyboardEvent) => {
+
+  const keyPressed = e.key
+ 
+  if(soundCheck(keyPressed)){
+    console.log('playing...',keyPressed)
+    //playKeySound(keyPressed)
+    socket.emit('sound_effect_request', { room_id: roomId.value, sound: keyPressed })
+  }
+};
+onMounted(()=>{
+ window.addEventListener('keydown', handleKey);
 })
 
 </script>
@@ -231,7 +254,6 @@ onMounted(() => {
         {{ btn.label }}
       </button>
     </div>
-    
     <div v-if="activeScreen == 'players'">
       <PlayerAdmin :room_id="roomId" :players="players" />
     </div>
@@ -249,6 +271,9 @@ onMounted(() => {
     </div>
     <div v-if="activeScreen == 'word_game'">
       <SecretWord :room_id="roomId" :isHostView="true" />
+    </div>
+    <div v-if="activeScreen == 'timer'">
+      <Timer :room_id="roomId" :isHostView="true" />
     </div>
   </div>
   <WildCardModal v-if="currentWildCard" :roomId="roomId" :wildCard="currentWildCard" :isVisible="isWildCardVisible" />

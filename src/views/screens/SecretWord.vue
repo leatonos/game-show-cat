@@ -2,6 +2,7 @@
 import { socket } from '../../plugins/plugins'
 import { onMounted, ref } from 'vue'
 import { secretWords } from '../../plugins/secretWords'
+import { playKeySound } from '../../plugins/soundEffects';
 
 const props = defineProps<{
   isHostView: boolean
@@ -27,6 +28,7 @@ const startTimer = () => {
     if (timeLeft.value > 0) {
       timeLeft.value--
     } else {
+      playKeySound('3');
       stopTimer('finish')
     }
   }, 1000)

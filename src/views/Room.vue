@@ -12,6 +12,8 @@ import type { Question } from '../plugins/questions'
 import QuestionBoard from './screens/QuestionBoard.vue'
 import WaveGame from './screens/WaveGame.vue'
 import SecretWord from './screens/SecretWord.vue'
+import Timer from './screens/Timer.vue'
+import { playKeySound, soundCheck } from '../plugins/soundEffects'
 
 const route = useRoute()
 const roomId = route.params.roomId as string
@@ -28,7 +30,6 @@ const sortedPlayers = computed(() => {
 })
 
 const answerQuestion = (questionId: string, state: QuestionState) => {
-
 
   for (const category of availableCategories.value) {
     const question = category.questions.find(
@@ -104,7 +105,27 @@ onMounted(() => {
     chosen_alternative.value = data.chosen_alternative
   })
 
+   socket.on('sound_effect',(data:string)=>{
+    playKeySound(data)
+  })
+
 })
+
+//Key Press Listeners
+const handleKey = (e: KeyboardEvent) => {
+
+  const keyPressed = e.key
+ 
+  if(soundCheck(keyPressed)){
+    console.log('playing...',keyPressed)
+    playKeySound(keyPressed)
+    //socket.emit('sound_effect_request', { room_id: roomId, sound: keyPressed })
+  }
+};
+onMounted(()=>{
+ window.addEventListener('keydown', handleKey);
+})
+
 
 </script>
 
@@ -130,7 +151,10 @@ onMounted(() => {
     <div v-if="activeScreen == 'wave_game'">
       <WaveGame :isHostView="false" room_id="roomId" />
     </div>
-    <div v-if="activeScreen == 'word_game'">
+    <div v-if="activeScreen == 'timer'">
+      <Timer :isHostView="false" room_id="roomId" />
+    </div>
+    <div v-if="activeScreen == 'secret_word'">
       <SecretWord :isHostView="false" room_id="roomId" />
     </div>
   </main>
