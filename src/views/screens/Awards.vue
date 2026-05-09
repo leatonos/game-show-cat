@@ -1,6 +1,4 @@
 <script setup lang="ts">
-import { socket } from '../../plugins/plugins';
-import { playKeySound } from '../../plugins/soundEffects';
 
 const props = defineProps<{
   isHostView: boolean
