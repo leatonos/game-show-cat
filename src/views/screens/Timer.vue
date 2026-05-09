@@ -115,19 +115,21 @@ function timeText(seconds: number) {
   justify-content: center;
   align-items: center;
   width: 100%;
-  height: 100vh;
+  height: 100%;
   padding: 0px;
   margin: 0;
-  gap: 10px;
 }
 
 .timer_text {
   display: flex;
   flex-direction: column;
+  
 }
 
-.timer_text h1 {
-  font-size: clamp(4rem, 12vw, 16rem);
+.timer_text h1{
+  font-size: clamp(0rem, 12vw, 16rem);
   margin: 0;
+  padding: 0px;
+  margin: 0px;
 }
 </style>

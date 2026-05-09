@@ -48,7 +48,7 @@ const askQuestion = (question:Question, player:Player | undefined,index:number,w
     const randomWildCardNumber = Math.floor(Math.random() * wildCardLibrary.length)
     console.log('Random Number: '+randomWildCardNumber)
     const randomWildCard = wildCardLibrary[randomWildCardNumber]
-    console.log('Random Card: '+randomWildCard)
+    console.log('Random Card: '+ randomWildCard)
     socket.emit('show_wild_card',{'room_id':props.room_id,'wild_card':randomWildCard})
   }
 
@@ -77,9 +77,9 @@ onMounted(() => {
    <main class="screen_container">
      <aside class="player_list">
       <PlayerView 
-        v-for="(player, index) in props.players" 
-        :key="player.id" 
-        :player="player" 
+        v-for="(player, index) in props.players"
+        :key="player.id"
+        :player="player"
         :isHostView="props.isHostView"
         :room_id="props.room_id"
         :class="{ active: index === playerTurn }"
@@ -89,7 +89,7 @@ onMounted(() => {
       <div class="question_board" v-if="props.players[playerTurn]">
         <div class="question_category_box" v-for="category in questionBoard" :key="category.name">
           <h2>{{ category.name }}</h2>
-          <p>{{ category.wildCardLocation }}</p>
+          <p>{{ category.wildCardLocation? category.wildCardLocation + 1 : '' }}</p>
           <div v-for="(question, index) in category.questions" :class="`question_box ${question.state}`" @click="askQuestion(question, currentPlayer, index, category.wildCardLocation!)"  :key="question.value">
             <p>{{ question.value }}</p>
           </div>

@@ -1,28 +1,42 @@
-// 1. Every Key Sound
 const SOUND_MAP: Record<string, string> = {
-  '1':'success_01.mp3',
+  '1': 'success_01.mp3',
   '2': 'error.mp3',
   '3': 'bell.mp3',
+  '4': 'fail.mp3',
+  '*': 'beep.mp3',
 };
 
-export const soundCheck = (key:string)=>{
-    const soundFileName = SOUND_MAP[key];
-    if(soundFileName){
-        return true
-    }else{
-        console.log(`No sound for ${key}`)
-        return false
-    }
-}
+// Cache audio instances so play and stop share the same object
+const audioCache: Record<string, HTMLAudioElement> = {};
 
-// 2. If key has a sound play it
+const getAudio = (key: string): HTMLAudioElement | null => {
+  const soundFileName = SOUND_MAP[key];
+  if (!soundFileName) return null;
+
+  if (!audioCache[key]) {
+    audioCache[key] = new Audio(`/soundfx/${soundFileName}`);
+  }
+  return audioCache[key];
+};
+
+export const soundCheck = (key: string): boolean => {
+  if (SOUND_MAP[key]) return true;
+  console.log(`No sound for ${key}`);
+  return false;
+};
+
 export const playKeySound = (key: string) => {
-  
-    const soundFileName = SOUND_MAP[key];
-  
-  if (soundFileName) {
-   const audio = new Audio(`/soundfx/${soundFileName}`);
-    audio.currentTime = 0; // Reset to start if already playing
+  const audio = getAudio(key);
+  if (audio) {
+    audio.currentTime = 0;
     audio.play().catch(err => console.error("Audio play failed:", err));
+  }
+};
+
+export const stopSound = (key: string) => {
+  const audio = getAudio(key);
+  if (audio) {
+    audio.pause();
+    audio.currentTime = 0;
   }
 };

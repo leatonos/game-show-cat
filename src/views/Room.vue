@@ -1,6 +1,6 @@
 <script setup lang="ts">
 
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, computed, onUnmounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { socket } from '../plugins/plugins'
 import type { Player } from '../types'
@@ -13,7 +13,11 @@ import QuestionBoard from './screens/QuestionBoard.vue'
 import WaveGame from './screens/WaveGame.vue'
 import SecretWord from './screens/SecretWord.vue'
 import Timer from './screens/Timer.vue'
-import { playKeySound, soundCheck } from '../plugins/soundEffects'
+import Awards from './screens/Awards.vue';
+import WildCardModal from './modals/WildCardModal.vue'
+
+import { playKeySound, soundCheck, stopSound } from '../plugins/soundEffects'
+import type { WildCardType } from '../plugins/wildcards'
 
 const route = useRoute()
 const roomId = route.params.roomId as string
@@ -22,6 +26,9 @@ const activeScreen = ref<string>('question_setup')
 const availableCategories = ref([...allQuestionCategories])
 const chosen_alternative = ref<string | undefined>(undefined)
 const activeQuestion = ref<Question | undefined>(undefined)
+const currentWildCard = ref<WildCardType | undefined>(undefined)
+const isWildCardVisible = ref<boolean>(false)
+const timerOn = ref(false)
 
 // 1. Reactive sorted list
 const sortedPlayers = computed(() => {
@@ -88,6 +95,13 @@ onMounted(() => {
   });
 
   socket.on('screen_changed', (data: { screen: string }) => {
+    if(data.screen === 'timer' && !timerOn.value){
+      timerOn.value = true
+      return
+    }else if(data.screen === 'controls'){
+      timerOn.value = false
+      return
+    }
     console.log("Screen change received:", data.screen);
     activeScreen.value = data.screen
   })
@@ -109,28 +123,60 @@ onMounted(() => {
     playKeySound(data)
   })
 
+  // ------------------- Wild Card Listeners -------------------
+  socket.on('wild_card_appear', (data: { wild_card: WildCardType }) => {
+    console.log("Wild card appeared:", data.wild_card);
+    currentWildCard.value = data.wild_card
+    isWildCardVisible.value = true;
+    console.log(data.wild_card)
+  })
+  
+  socket.on('wild_card_hidden', () => {
+    currentWildCard.value = undefined
+    isWildCardVisible.value = false;
+  })
+
 })
 
 //Key Press Listeners
-const handleKey = (e: KeyboardEvent) => {
+const keysHeld = new Set<string>();
 
-  const keyPressed = e.key
- 
-  if(soundCheck(keyPressed)){
-    console.log('playing...',keyPressed)
-    playKeySound(keyPressed)
-    //socket.emit('sound_effect_request', { room_id: roomId, sound: keyPressed })
+const handleKey = (e: KeyboardEvent) => {
+  const keyPressed = e.key;
+
+  // Ignore repeat events while key is held
+  if (keysHeld.has(keyPressed)) return;
+
+  if (soundCheck(keyPressed)) {
+    keysHeld.add(keyPressed);
+    console.log('playing...', keyPressed);
+    playKeySound(keyPressed);
   }
 };
-onMounted(()=>{
- window.addEventListener('keydown', handleKey);
-})
 
+const stopKeySound = (e: KeyboardEvent) => {
+  const keyPressed = e.key;
+  if(keyPressed === '*'){
+    keysHeld.delete(keyPressed);
+    stopSound(keyPressed);
+  }
+};
+
+onMounted(() => {
+  window.addEventListener('keydown', handleKey);
+  window.addEventListener('keyup', stopKeySound);
+});
+
+onUnmounted(() => {
+  window.removeEventListener('keydown', handleKey);
+  window.removeEventListener('keyup', stopKeySound);
+});
 
 </script>
 
 <template>
   <main class="room">
+    
     <!-- <h1>Room: {{ roomId }}</h1> -->
     <TransitionGroup v-if="activeScreen == 'players'" name="list" tag="div" class="players-container">
       <PlayerView 
@@ -151,12 +197,16 @@ onMounted(()=>{
     <div v-if="activeScreen == 'wave_game'">
       <WaveGame :isHostView="false" room_id="roomId" />
     </div>
-    <div v-if="activeScreen == 'timer'">
-      <Timer :isHostView="false" room_id="roomId" />
-    </div>
-    <div v-if="activeScreen == 'secret_word'">
+    <div v-if="activeScreen == 'word_game'">
       <SecretWord :isHostView="false" room_id="roomId" />
     </div>
+    <div v-if="activeScreen == 'awards'">
+      <Awards :isHostView="false" room_id="roomId" />
+    </div>
+    <div class="timer_modal" v-if="timerOn">
+      <Timer :isHostView="false" room_id="roomId" />
+    </div>
+    <WildCardModal v-if="currentWildCard" :roomId="roomId" :wildCard="currentWildCard" :isVisible="isWildCardVisible" />
   </main>
 </template>
 
@@ -195,4 +245,18 @@ onMounted(()=>{
 .list-leave-active {
   position: absolute;
 }
+
+.timer_modal{
+  position: fixed;
+  top: 0%;
+  left: 0;
+  width: 25%;
+  margin: 20px;
+  padding: 10px;
+  padding-top: 0px;
+  background-color: black;
+  z-index: 1000;
+  border-radius: 10px;
+}
+
 </style>

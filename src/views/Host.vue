@@ -17,6 +17,7 @@ import WaveGame from './screens/WaveGame.vue';
 import SecretWord from './screens/SecretWord.vue';
 import { soundCheck } from '../plugins/soundEffects';
 import Timer from './screens/Timer.vue';
+import Awards from './screens/Awards.vue';
 
 
 const createRoom = () => {
@@ -239,11 +240,16 @@ onMounted(()=>{
  window.addEventListener('keydown', handleKey);
 })
 
+
+const goBackToControls = () => {
+  socket.emit('change_screen', { room_id: roomId.value, screen: 'controls' })
+}
+
 </script>
 
 <template>
   <div class="corner_button" v-if="activeScreen != 'controls'">
-    <button @click="activeScreen = 'controls'">Back</button>
+    <button @click="goBackToControls">Back</button>
   </div>
   <div v-if="!isGameReady" v-motion-fade>
     <button @click="createRoom">Open game room</button>
@@ -274,6 +280,9 @@ onMounted(()=>{
     </div>
     <div v-if="activeScreen == 'timer'">
       <Timer :room_id="roomId" :isHostView="true" />
+    </div>
+    <div v-if="activeScreen == 'awards'">
+      <Awards :room_id="roomId" :isHostView="true" />
     </div>
   </div>
   <WildCardModal v-if="currentWildCard" :roomId="roomId" :wildCard="currentWildCard" :isVisible="isWildCardVisible" />

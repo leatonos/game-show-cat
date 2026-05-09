@@ -14,5 +14,5 @@ export const secretWords = [
   "school","shirt","sock","stairs","stick","store","storm","tent","ticket","toast",
   "towel","truck","vase","village","whale","bread","butter","honey","jam","rice",
   "soup","tea","water","juice","milk","coffee","cookie","cake","pie","candy",
-  "apple","banana","grape","lemon","mango","melon","peach","pear","plum","berry"
+  "banana","grape","lemon","mango","melon","peach","pear","plum","berry"
 ];

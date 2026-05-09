@@ -16,7 +16,7 @@ const allWordsAvailable = ref<string[]>([...secretWords])
 const guessingWord = ref<string>('')
 const gameState = ref<WordGameState>('idle')
 const score = ref(0)
-const timeLeft = ref(120)
+const timeLeft = ref(60)
 let timer: number | null = null
 
 // ---------------- TIMER ----------------
@@ -42,7 +42,7 @@ const stopTimer = (newGameState:WordGameState) => {
 }
 const resetGame = () => {
   stopTimer('idle')
-  timeLeft.value = 120
+  timeLeft.value = 60
   score.value = 0
   allWordsAvailable.value = [...secretWords]
 }
@@ -73,6 +73,13 @@ const restartGameCommand = () => {
 
 // ---------------- WORD LOGIC ----------------
 const pickNextWord = (addScore: number) => {
+
+  if(addScore > 0){
+    playKeySound('1')
+  }else{
+    playKeySound('2')
+  }
+
   if (!props.room_id) return
 
   // remove word locally (HOST ONLY)

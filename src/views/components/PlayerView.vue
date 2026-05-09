@@ -25,12 +25,12 @@ const deletePlayer = () => {
       <p class="score">{{ player.score }}</p>
       <div v-if="isHostView">
         <div class="button-line">
-          <button @click="changeScore(50)" class="score-button">+50</button>
+          <button @click="changeScore(10)" class="score-button">+10</button>
           <button @click="changeScore(100)" class="score-button">+100</button>
           <button @click="changeScore(250)" class="score-button">+250</button>
         </div>
         <div class="button-line">
-          <button @click="changeScore(-50)" class="score-button">-50</button>
+          <button @click="changeScore(-10)" class="score-button">-10</button>
           <button @click="changeScore(-100)" class="score-button">-100</button>
           <button @click="changeScore(-250)" class="score-button">-250</button>
         </div>

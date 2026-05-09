@@ -17,8 +17,15 @@ export const wildCardLibrary:WildCardType[] = [
     {
         name: "I think you know this one",
         image: "https://placehold.co/300x200",
-        description: "Force another player of your choice to answer this question. If they answer incorrectly, they lose points equal to the question’s value.",
+        description: "Force another player of your choice to answer this question. If they answer incorrectly, they lose points 1.5xequal to the question’s value.",
         useCondition: "Can be used whenever the host asks a question.",
+        color: "blue"
+    },
+    {
+        name: "Swap questions",
+        image: "https://placehold.co/300x200",
+        description: "Swap a question with the other team (same point value)",
+        useCondition: "Both swapped questions must be answered when this card is used",
         color: "blue"
     },
     {
@@ -26,6 +33,20 @@ export const wildCardLibrary:WildCardType[] = [
         image: "https://placehold.co/300x200",
         description: "At the end of the game you can ask the host to tell how much points one of players lost",
         useCondition: "",
+        color: "white"
+    },
+    {
+        name: "I changed my mind",
+        image: "https://placehold.co/300x200",
+        description: "If you don't like the question you got, you can use this card to get a new one",
+        useCondition: "",
+        color: "white"
+    },
+    {
+        name: "Some times we need a second chance",
+        image: "https://placehold.co/300x200",
+        description: "Gives you another opportunity to answer a question correctly",
+        useCondition: "You can use this card immediately after giving an incorrect answer to a question.",
         color: "white"
     },
     {
@@ -42,13 +63,7 @@ export const wildCardLibrary:WildCardType[] = [
         useCondition: "Can be used anytime host shows alternatives",
         color: "green"
     },
-     {
-        name: "Swap questions",
-        image: "https://placehold.co/300x200",
-        description: "Swap a question with the other team (same point value)",
-        useCondition: "Both swapped questions must be answered when this card is used",
-        color: "blue"
-    },
+     
     
 
 
