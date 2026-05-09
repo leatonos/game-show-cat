@@ -75,7 +75,7 @@ onMounted(() => {
 
 <template>
    <main class="screen_container">
-     <aside class="player_list">
+     <aside v-if="isHostView" class="player_list">
       <PlayerView 
         v-for="(player, index) in props.players"
         :key="player.id"
@@ -89,7 +89,7 @@ onMounted(() => {
       <div class="question_board" v-if="props.players[playerTurn]">
         <div class="question_category_box" v-for="category in questionBoard" :key="category.name">
           <h2>{{ category.name }}</h2>
-          <p>{{ category.wildCardLocation? category.wildCardLocation + 1 : '' }}</p>
+          <p v-if="isHostView">{{ category.wildCardLocation? category.wildCardLocation + 1 : '' }}</p>
           <div v-for="(question, index) in category.questions" :class="`question_box ${question.state}`" @click="askQuestion(question, currentPlayer, index, category.wildCardLocation!)"  :key="question.value">
             <p>{{ question.value }}</p>
           </div>
@@ -132,7 +132,7 @@ onMounted(() => {
 
 /* ---------------- CATEGORY COLUMN ---------------- */
 .question_category_box {
-  flex: 0 0 clamp(160px, 22vw, 220px);
+  flex: 1;
   display: flex;
   flex-direction: column;
   align-items: center;

@@ -156,8 +156,10 @@ const handleKey = (e: KeyboardEvent) => {
 
 const stopKeySound = (e: KeyboardEvent) => {
   const keyPressed = e.key;
-  if(keyPressed === '*'){
-    keysHeld.delete(keyPressed);
+  
+  keysHeld.delete(keyPressed); // 👈 always remove on keyup
+
+  if (keyPressed === '*') {
     stopSound(keyPressed);
   }
 };

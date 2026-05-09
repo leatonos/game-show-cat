@@ -5,7 +5,6 @@ const props = defineProps<{
   wildCard: WildCardType
 }>();
 
-const imageLink = props.wildCard.image
 const cardColor = props.wildCard.color
 
 type CardColor = 'white' | 'blue' | 'green' | 'black' | 'red'
@@ -106,7 +105,7 @@ const theme: ColorTheme = isValidColor(cardColor)
     <div class="card_image_container">
       <img
         class="card_image"
-        :src="imageLink"
+        :src="`/cards_images/${props.wildCard.image}`"
         :style="{ outline: theme.imageRing }"
       />
     </div>
@@ -123,8 +122,10 @@ const theme: ColorTheme = isValidColor(cardColor)
   display: flex;
   flex-direction: column;
   gap: 0.75em;
-  width: 35%;
-  max-width: 240px;
+  width: 25dvw;
+  min-width: 300px;
+  min-height: 50dvh;
+  height: auto;
   padding: 1.5em;
   border-radius: 16px;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
@@ -133,17 +134,6 @@ const theme: ColorTheme = isValidColor(cardColor)
 
 .card:hover {
   transform: translateY(-4px) scale(1.01);
-}
-
-.card_badge {
-  display: inline-block;
-  align-self: flex-start;
-  font-size: 0.65rem;
-  font-weight: 600;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  padding: 0.2em 0.65em;
-  border-radius: 999px;
 }
 
 .card_name_container h1 {
@@ -165,7 +155,8 @@ const theme: ColorTheme = isValidColor(cardColor)
 
 .card_image {
   width: 100%;
-  height: auto;
+  height: 180px; /* or whatever fixed size you want */
+  object-fit: cover;
   border-radius: 8px;
   display: block;
   outline-offset: 2px;
@@ -179,7 +170,8 @@ const theme: ColorTheme = isValidColor(cardColor)
 
 .description_container p {
   text-align: left;
-  font-size: 0.85rem;
+  font-weight: 600;
+  font-size: 1.3rem;
   margin: 0;
   line-height: 1.5;
 }

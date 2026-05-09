@@ -3,6 +3,10 @@ const SOUND_MAP: Record<string, string> = {
   '2': 'error.mp3',
   '3': 'bell.mp3',
   '4': 'fail.mp3',
+  '5': 'applause.mp3',
+  '7': 'song_game_1.mp3',
+  '8': 'song_game_2.mp3',
+  '9': 'song_game_3.mp3',
   '*': 'beep.mp3',
 };
 
@@ -20,6 +24,10 @@ const getAudio = (key: string): HTMLAudioElement | null => {
 };
 
 export const soundCheck = (key: string): boolean => {
+  if (key === 'Enter') {
+    stopAllSounds();
+    return false;
+  }
   if (SOUND_MAP[key]) return true;
   console.log(`No sound for ${key}`);
   return false;
@@ -39,4 +47,11 @@ export const stopSound = (key: string) => {
     audio.pause();
     audio.currentTime = 0;
   }
+};
+
+const stopAllSounds = () => {
+  Object.values(audioCache).forEach(audio => {
+    audio.pause();
+    audio.currentTime = 0;
+  });
 };

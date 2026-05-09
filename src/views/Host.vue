@@ -18,6 +18,7 @@ import SecretWord from './screens/SecretWord.vue';
 import { soundCheck } from '../plugins/soundEffects';
 import Timer from './screens/Timer.vue';
 import Awards from './screens/Awards.vue';
+import AllCards from './screens/AllCards.vue';
 
 
 const createRoom = () => {
@@ -78,6 +79,8 @@ const buttons = ref<GridButton[]>([
   { label: "Load Saved Data", action: "load_saved_data"},
   { label: "Delete Saved Data & Reset Room", action: "delete_saved_data"},
   { label: "Syncronize Room", action: "synchronize_room"},
+  { label: "Show Awards", action: "open_awards"},
+  { label: "Open All Cards View", action: "open_allCards"}
 ]);
 
 //Button Handler
@@ -91,6 +94,8 @@ const handleButtonClick = (action: string) => {
     synchronize_room: () => synchronizeRoom(),
     load_saved_data: () => loadSavedData(),
     delete_saved_data: () => deleteSavedData(),
+    open_allCards: () => {activeScreen.value = 'all_cards'},
+    open_awards: () => {socket.emit('change_screen', { room_id: roomId.value, screen: 'awards' })},
     open_wavegame: () => { socket.emit('change_screen', { room_id: roomId.value, screen: 'wave_game' })},
     open_timer: () => { socket.emit('change_screen', { room_id: roomId.value, screen: 'timer' })},
     open_wordgame: () => { socket.emit('change_screen', { room_id: roomId.value, screen: 'word_game' })}
@@ -283,6 +288,9 @@ const goBackToControls = () => {
     </div>
     <div v-if="activeScreen == 'awards'">
       <Awards :room_id="roomId" :isHostView="true" />
+    </div>
+    <div v-if="activeScreen == 'all_cards'">
+      <AllCards :room_id="roomId" :isHostView="true" />
     </div>
   </div>
   <WildCardModal v-if="currentWildCard" :roomId="roomId" :wildCard="currentWildCard" :isVisible="isWildCardVisible" />
